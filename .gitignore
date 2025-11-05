@@ -1,0 +1,55 @@
+# Archivos de compilación
+/build/
+*.elf
+*.bin
+*.map
+*.hex
+*.img
+
+# Archivos de CMake generados
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Archivos de IDF.py
+.project
+.cproject
+.settings/
+
+# Archivos de entorno virtual de Python (si lo usas)
+.env
+.env/
+.venv/
+env/
+venv/
+pip-selfcheck.json
+
+# Archivos temporales de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Archivos de log y salida
+*.log
+
+# Configuración local de ESP-IDF
+sdkconfig
+sdkconfig.old
+
+# VSCode config (opcional)
+.vscode/
+
+# Archivos temporales del sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de partición generados
+partition_table/*.bin
+
+# Archivos EEZ
+*.eez-project-ui-state
+
+client.py
+
