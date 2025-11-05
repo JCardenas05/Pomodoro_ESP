@@ -1,10 +1,13 @@
 # Archivos de compilación
-/build/
+build/
 *.elf
 *.bin
 *.map
 *.hex
 *.img
+
+# Archivos que se descargan de forma dinamica
+managed_components/
 
 # Archivos de CMake generados
 CMakeFiles/
