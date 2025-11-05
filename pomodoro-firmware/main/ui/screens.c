@@ -99,22 +99,6 @@ void create_screen_main() {
                     lv_obj_set_style_flex_track_place(obj, LV_FLEX_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_obj_set_style_pad_top(obj, 5, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_obj_set_style_pad_bottom(obj, 5, LV_PART_MAIN | LV_STATE_DEFAULT);
-                    {
-                        lv_obj_t *parent_obj = obj;
-                        {
-                            lv_obj_t *obj = lv_obj_create(parent_obj);
-                            objects.obj0 = obj;
-                            lv_obj_set_pos(obj, 0, 0);
-                            lv_obj_set_size(obj, 285, 46);
-                            lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_obj_set_style_pad_top(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_obj_set_style_pad_right(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            create_user_widget_task_card(obj, 5);
-                        }
-                    }
                 }
                 {
                     // container_error
@@ -207,7 +191,6 @@ void tick_screen_main() {
             tick_value_change_obj = NULL;
         }
     }
-    tick_user_widget_task_card(5);
     {
         bool new_val = get_var_error_hidden();
         bool cur_val = lv_obj_has_flag(objects.container_error, LV_OBJ_FLAG_HIDDEN);
@@ -391,7 +374,7 @@ void create_screen_pomo_ui() {
                                             lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                             lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                             lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                            create_user_widget_progress_item(obj, 21);
+                                            create_user_widget_progress_item(obj, 18);
                                         }
                                         {
                                             // pomo.progress.2
@@ -405,7 +388,7 @@ void create_screen_pomo_ui() {
                                             lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                             lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                             lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                            create_user_widget_progress_item(obj, 24);
+                                            create_user_widget_progress_item(obj, 21);
                                         }
                                     }
                                 }
@@ -550,6 +533,20 @@ void create_screen_pomo_ui() {
                                         lv_obj_t *parent_obj = obj;
                                         {
                                             lv_obj_t *obj = lv_obj_create(parent_obj);
+                                            objects.obj0 = obj;
+                                            lv_obj_set_pos(obj, 0, 0);
+                                            lv_obj_set_size(obj, 12, 12);
+                                            lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_pad_top(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_pad_right(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            create_user_widget_pomo_point(obj, 33);
+                                            lv_obj_set_style_border_color(obj, lv_color_hex(0xffe0e0e0), LV_PART_MAIN | LV_STATE_DEFAULT);
+                                        }
+                                        {
+                                            lv_obj_t *obj = lv_obj_create(parent_obj);
                                             objects.obj1 = obj;
                                             lv_obj_set_pos(obj, 0, 0);
                                             lv_obj_set_size(obj, 12, 12);
@@ -559,8 +556,7 @@ void create_screen_pomo_ui() {
                                             lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                             lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                             lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                            create_user_widget_pomo_point(obj, 36);
-                                            lv_obj_set_style_border_color(obj, lv_color_hex(0xffe0e0e0), LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            create_user_widget_pomo_point(obj, 34);
                                         }
                                         {
                                             lv_obj_t *obj = lv_obj_create(parent_obj);
@@ -573,7 +569,7 @@ void create_screen_pomo_ui() {
                                             lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                             lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                             lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                            create_user_widget_pomo_point(obj, 37);
+                                            create_user_widget_pomo_point(obj, 35);
                                         }
                                         {
                                             lv_obj_t *obj = lv_obj_create(parent_obj);
@@ -586,20 +582,7 @@ void create_screen_pomo_ui() {
                                             lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                             lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                             lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                            create_user_widget_pomo_point(obj, 38);
-                                        }
-                                        {
-                                            lv_obj_t *obj = lv_obj_create(parent_obj);
-                                            objects.obj4 = obj;
-                                            lv_obj_set_pos(obj, 0, 0);
-                                            lv_obj_set_size(obj, 12, 12);
-                                            lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                            lv_obj_set_style_pad_top(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                            lv_obj_set_style_pad_right(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                            lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                            lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                            lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                            create_user_widget_pomo_point(obj, 39);
+                                            create_user_widget_pomo_point(obj, 36);
                                             lv_obj_set_style_border_opa(obj, 10, LV_PART_MAIN | LV_STATE_DEFAULT);
                                         }
                                     }
@@ -634,8 +617,8 @@ void tick_screen_pomo_ui() {
             tick_value_change_obj = NULL;
         }
     }
+    tick_user_widget_progress_item(18);
     tick_user_widget_progress_item(21);
-    tick_user_widget_progress_item(24);
     {
         int32_t new_val = get_var_pomo_time_progress();
         int32_t cur_val = lv_arc_get_value(objects.pomo_time_progress);
@@ -645,10 +628,10 @@ void tick_screen_pomo_ui() {
             tick_value_change_obj = NULL;
         }
     }
+    tick_user_widget_pomo_point(33);
+    tick_user_widget_pomo_point(34);
+    tick_user_widget_pomo_point(35);
     tick_user_widget_pomo_point(36);
-    tick_user_widget_pomo_point(37);
-    tick_user_widget_pomo_point(38);
-    tick_user_widget_pomo_point(39);
 }
 
 void create_user_widget_task_card(lv_obj_t *parent_obj, int startWidgetIndex) {
