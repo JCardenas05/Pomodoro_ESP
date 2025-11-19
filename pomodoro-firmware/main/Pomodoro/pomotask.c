@@ -118,6 +118,8 @@ static void pomodoro_task(void *arg) { //sin Time Drift
     }
 }
 
+// --- API Pública ---
+
 void pomodoro_init(const pomodoro_config_t *config, pomodoro_callback_t callback) {
     if (s_pomodoro_mutex == NULL) {
         s_pomodoro_mutex = xSemaphoreCreateMutex();
@@ -133,7 +135,6 @@ void pomodoro_init(const pomodoro_config_t *config, pomodoro_callback_t callback
         xSemaphoreGive(s_pomodoro_mutex);
     }
     
-    // Crear la tarea solo una vez
     if (xTaskGetHandle("PomodoroTask") == NULL) {
         xTaskCreate(pomodoro_task, "PomodoroTask", 2048, NULL, 5, NULL);
     }

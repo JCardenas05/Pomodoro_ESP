@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
-#include <stddef.h> // Para size_t
+#include <stddef.h> 
 
 // 1. Estados de la Máquina de Estados Finita (FSM)
 typedef enum {

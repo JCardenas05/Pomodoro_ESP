@@ -17,6 +17,7 @@
 #include "adc_lib.h"
 #include "Pomodoro/pomotask.h"
 #include "actions.h"
+#include "ui_events.h"
 
 static const char *TAG = "MAIN";
 
@@ -35,6 +36,8 @@ static const char *TAG = "MAIN";
 uint8_t current_page = SCREEN_ID_MAIN;
 uint8_t num_pages = 2;
 uint8_t current_section_pomo = P_STATE_FOCUS;
+
+QueueHandle_t ui_event_queue;
 
 void update_task_focus(lv_obj_t *parent_obj);
 
@@ -217,33 +220,61 @@ void websocket_task(void *pvParameters) {
 }
 
 void pomodoro_interval_finished_callback(pomodoro_state_t finished_state) {
+    ui_message_t msg;
+    msg.type = UI_EVENT_INTERVAL_END;
+    msg.data.pomo_state = finished_state;
     ESP_LOGI(TAG, "--- INTERVALO FINALIZADO ---");
-    if (xSemaphoreTake(ui_mutex, pdMS_TO_TICKS(100)) == pdTRUE) {
-        switch (finished_state) {
-            case P_STATE_FOCUS:
-                ESP_LOGW(TAG, "¡El tiempo de ENFOQUE ha terminado! Inicia la PAUSA.");
-                // Aquí puedes activar una alarma, vibración, o cambiar la luz LED.
-                break;
-            case P_STATE_SHORT_BREAK:
-                ESP_LOGW(TAG, "¡La PAUSA CORTA ha terminado! Regresa al ENFOQUE.");
-                break;
-            case P_STATE_LONG_BREAK:
-                ESP_LOGW(TAG, "¡La PAUSA LARGA (Recarga) ha terminado! Nuevo ciclo de ENFOQUE.");
-                break;
-            default:
-                break;
-        }
-        xSemaphoreGive(ui_mutex);
+    if (xQueueSend(ui_event_queue, &msg, pdMS_TO_TICKS(10)) != pdPASS) {
+        ESP_LOGE(TAG, "Failed to send UI event to queue");
     }
 }
 
-// -------------------- Función principal --------------------
-void app_main(void) {
+void handle_interval_end_ui() {
+    remove_style_pomo_focus(objects.pomo_ui);
+    remove_style_pomo_pause_st(objects.pomo_ui);
+    remove_style_pomo_pause_lg(objects.pomo_ui);
+    pomodoro_state_t current_state = pomodoro_get_state();
+    switch (current_state) {
+        case P_STATE_FOCUS:
+            add_style_pomo_focus(objects.pomo_ui);
+            break;
+        case P_STATE_SHORT_BREAK:
+            add_style_pomo_pause_st(objects.pomo_ui);
+            break;
+        case P_STATE_LONG_BREAK:
+            add_style_pomo_pause_lg(objects.pomo_ui);
+            break;
+        default:
+            break;
+    }
+}
+
+void lvgl_task(void *arg) {
     LCD_Init();
     BK_Light(5);
     LVGL_Init();
     ui_init();
     change_color_theme(0);
+    ui_message_t received_msg;
+    while (1) {
+        if (xQueueReceive(ui_event_queue, &received_msg, portMAX_DELAY) == pdTRUE) {       
+            switch (received_msg.type) {
+                case UI_EVENT_INTERVAL_END:
+                    handle_interval_end_ui();
+                    break;
+                case UI_EVENT_START_BUTTON_CLICKED:
+                    ESP_LOGI(TAG, "Start button clicked event received");
+                    break;
+            }
+        }
+    }
+}
+
+// -------------------- Función principal --------------------
+void app_main(void) {
+
+    ui_event_queue = xQueueCreate(10, sizeof(ui_message_t));
+    xTaskCreate(lvgl_task, "LVGL_UI", 4096, NULL, 5, NULL);
 
     gpio_config_t io_conf = {};
     io_conf.intr_type = GPIO_INTR_POSEDGE;
