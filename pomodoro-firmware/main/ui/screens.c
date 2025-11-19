@@ -509,7 +509,7 @@ void create_screen_pomo_ui() {
                                     lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                                     lv_obj_set_style_text_color(obj, lv_color_hex(0xffffffff), LV_PART_MAIN | LV_STATE_DEFAULT);
                                     lv_obj_set_style_text_font(obj, &lv_font_montserrat_30, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                    lv_label_set_text(obj, "10:40");
+                                    lv_label_set_text(obj, "");
                                 }
                                 {
                                     // pomo_points_container
@@ -609,7 +609,7 @@ void tick_screen_pomo_ui() {
         }
     }
     {
-        const char *new_val = get_var_pomo_task_type();
+        const char *new_val = get_var_pomo_task_category();
         const char *cur_val = lv_label_get_text(objects.focus_tipe);
         if (strcmp(new_val, cur_val) != 0) {
             tick_value_change_obj = objects.focus_tipe;
@@ -625,6 +625,15 @@ void tick_screen_pomo_ui() {
         if (new_val != cur_val) {
             tick_value_change_obj = objects.pomo_time_progress;
             lv_arc_set_value(objects.pomo_time_progress, new_val);
+            tick_value_change_obj = NULL;
+        }
+    }
+    {
+        const char *new_val = get_var_clock_time();
+        const char *cur_val = lv_label_get_text(objects.focus_time);
+        if (strcmp(new_val, cur_val) != 0) {
+            tick_value_change_obj = objects.focus_time;
+            lv_label_set_text(objects.focus_time, new_val);
             tick_value_change_obj = NULL;
         }
     }

@@ -13,12 +13,12 @@ static lv_color_t task_priority_colors[4] = {
     LV_COLOR_MAKE(0xff, 0xf3, 0x68)  // Índice 3 (Baja/amarillo)
 };
 
-static const char *task_type_icon[] = {
-    "\ueb8b",  // na
-    "\uf53b", // study
-    "\ue8f9", // work
-    "\ue88a", // home
-    "\uef86" // personal
+static const char *task_type_icon[][2] = {
+    { "\ueb8b", "NA" },  // na
+    { "\uf53b", "Study" }, // study
+    { "\ue8f9", "Work" }, // work
+    { "\ue88a", "Home" }, // home
+    { "\uef86", "Personal" } // personal
 };
 
 // -------Evento para hacer focus y centrar una tarea seleccionada ------
@@ -46,13 +46,17 @@ lv_color_t get_priority_color(uint8_t prioridad)
     return task_priority_colors[prioridad];
 }
 
-// -------------------- Obtener el icono segun el tipo --------------------
-const char *get_task_icon(uint8_t categoria)
+// -------------------- Obtener el icono y nombre segun el tipo --------------------
+taskIconData get_task_icon_data(uint8_t categoria)
 {
-    if (categoria >= sizeof(task_type_icon) / sizeof(task_type_icon[0])) {
+    size_t num_categorias = sizeof(task_type_icon) / sizeof(task_type_icon[0]);
+    taskIconData resultado;
+    if (categoria >= num_categorias) {
         categoria = 0; 
     }
-    return task_type_icon[categoria];
+    resultado.icon = task_type_icon[categoria][0];
+    resultado.name = task_type_icon[categoria][1];
+    return resultado;
 }
 
 // -------------------- Crear card de tarea --------------------
@@ -101,7 +105,7 @@ void create_user_widget_task_card_(lv_obj_t *parent_obj, int startWidgetIndex) {
     }
 }
 
-task_card_t create_widget_task(lv_obj_t *parent_obj, const char *title, lv_color_t priority_color, const char *type)
+task_card_t create_widget_task(lv_obj_t *parent_obj, const char *title, lv_color_t priority_color, const char *category)
 {
     task_card_t card;
     lv_obj_t *obj = parent_obj;
@@ -119,11 +123,12 @@ task_card_t create_widget_task(lv_obj_t *parent_obj, const char *title, lv_color
             {
                 lv_obj_t *parent_obj = obj;
                 {
+                    // category icon
                     lv_obj_t *obj = lv_label_create(parent_obj);
                     lv_obj_set_pos(obj, 0, 0);
                     lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                     add_style_task_priority(obj);
-                    lv_label_set_text(obj, type);
+                    lv_label_set_text(obj, category);
                 }
                 {
                     // text

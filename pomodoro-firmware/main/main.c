@@ -20,11 +20,13 @@
 
 static const char *TAG = "MAIN";
 
-#define API_BASE_URL "http://192.168.1.105:8000" // URL base del servidor de la API
+#define SERVER_HOTS_IP "136.119.200.119:8000"
+
+#define API_BASE_URL "http://" SERVER_HOTS_IP // URL base del servidor de la API
 #define API_ENDPOINT "/tasks"
 
 #define NO_DATA_TIMEOUT_SEC 120
-#define WS_BASE_URL "ws://192.168.1.105:8000"
+#define WS_BASE_URL "ws://" SERVER_HOTS_IP // URL base del servidor WebSocket
 #define WS_ENDPOINT "/ws"
 
 #define GPIO_INPUT_IO_9     9
@@ -32,6 +34,7 @@ static const char *TAG = "MAIN";
 
 uint8_t current_page = SCREEN_ID_MAIN;
 uint8_t num_pages = 2;
+uint8_t current_section_pomo = P_STATE_FOCUS;
 
 void update_task_focus(lv_obj_t *parent_obj);
 
@@ -48,6 +51,7 @@ static inline float map_range(float value, float in_min, float in_max, float out
 
 void set_task_pomo(){
     set_var_pomo_name_task(tasks[selected_task].title);
+    set_var_pomo_task_category(get_task_icon_data(tasks[selected_task].category).name);
 }
 
 static void check_button(void *arg)
@@ -63,6 +67,9 @@ static void check_button(void *arg)
             ESP_LOGI(TAG, "Button pressed - Switching to page %d", current_page);
             set_task_pomo();
             loadScreen(current_page);
+            if (current_page == SCREEN_ID_POMO_UI){
+                pomodoro_start();
+            }
         }
         prev_state = curr_state;
         vTaskDelay(pdMS_TO_TICKS(100));
@@ -84,12 +91,10 @@ void adc_task(void *arg)
         .unit_id = ADC_UNIT_1,
     };
     ESP_ERROR_CHECK(adc_oneshot_new_unit(&init_config, &adc_handle));
-
     adc_oneshot_chan_cfg_t config = {
         .bitwidth = ADC_BITWIDTH_DEFAULT, // Ancho de bits por defecto (12 bits)
         .atten = ADC_ATTEN_DB_12,         // Atenuación de 11dB para un rango de voltaje de 0-3.9V
     };
-
     ESP_ERROR_CHECK(adc_oneshot_config_channel(adc_handle, ADC_CHANNEL_0, &config));
     int adc_scroll_value = 0;
 
@@ -126,6 +131,7 @@ void create_task_item_ui(const int index, const ws_task_t *task) { // Funcion ll
             if (strcmp(tasks[j].id, task->id) == 0) {
                 ESP_LOGI(TAG, "Tarea ya existe en UI: %s", task->text);
                 tasks[j].priority = get_priority_color(task->priority);
+                tasks[j].category = task->category;
                 strncpy(tasks[j].title, task->text, sizeof(tasks[j].title) - 1);
                 tasks[j].title[sizeof(tasks[j].title) - 1] = '\0';  // Asegurar la terminación
                 tick_dynamic_tasks();
@@ -139,11 +145,12 @@ void create_task_item_ui(const int index, const ws_task_t *task) { // Funcion ll
         objects.task_list_container,
         task->text,
         get_priority_color(task->priority),
-        get_task_icon(task->type)
+        get_task_icon_data(task->category).icon
     );
     strncpy(tasks[task_count].id, task->id, sizeof(tasks[task_count].id) - 1);
     strncpy(tasks[task_count].title, task->text, sizeof(tasks[task_count].title) - 1);
     tasks[task_count].priority = get_priority_color(task->priority);
+    tasks[task_count].category = task->category;
     task_count++; 
 }
 
@@ -194,7 +201,7 @@ void on_status_changed(const char *status, bool is_error) {
 }
 
 void on_error_hidden_changed(const char *message, bool is_error) {
-    ESP_LOGI(TAG, "Error hidden changed: %s, is_error: %s", message, is_error ? "yes" : "no");\  
+    ESP_LOGI(TAG, "Error hidden changed: %s, is_error: %s", message, is_error ? "yes" : "no");
     set_var_error_hidden(false);
     set_var_spinner_api(true);
     set_var_tasks_hidden(true);
@@ -207,6 +214,27 @@ void websocket_task(void *pvParameters) {
     websocket_app_start(config); 
     ESP_LOGI(TAG, "WebSocket task finished");
     vTaskDelete(NULL);
+}
+
+void pomodoro_interval_finished_callback(pomodoro_state_t finished_state) {
+    ESP_LOGI(TAG, "--- INTERVALO FINALIZADO ---");
+    if (xSemaphoreTake(ui_mutex, pdMS_TO_TICKS(100)) == pdTRUE) {
+        switch (finished_state) {
+            case P_STATE_FOCUS:
+                ESP_LOGW(TAG, "¡El tiempo de ENFOQUE ha terminado! Inicia la PAUSA.");
+                // Aquí puedes activar una alarma, vibración, o cambiar la luz LED.
+                break;
+            case P_STATE_SHORT_BREAK:
+                ESP_LOGW(TAG, "¡La PAUSA CORTA ha terminado! Regresa al ENFOQUE.");
+                break;
+            case P_STATE_LONG_BREAK:
+                ESP_LOGW(TAG, "¡La PAUSA LARGA (Recarga) ha terminado! Nuevo ciclo de ENFOQUE.");
+                break;
+            default:
+                break;
+        }
+        xSemaphoreGive(ui_mutex);
+    }
 }
 
 // -------------------- Función principal --------------------
@@ -226,7 +254,15 @@ void app_main(void) {
 
     xTaskCreate(check_button, "check_button", 2048, NULL, 10, NULL);
 
-    pomotask_init(10, NULL);
+    const pomodoro_config_t my_config = {
+        .focus_duration_sec = 25,         // 25 minutos
+        .short_break_sec = 5,             // 5 minutos
+        .long_break_sec = 15,             // 15 minutos
+        .cycles_before_long_break = 4          // Pausa larga después de 4 enfoques
+    };
+
+    pomodoro_init(&my_config, pomodoro_interval_finished_callback);
+    ESP_LOGI(TAG, "Librería Pomodoro inicializada con ciclos de %d minutos.", my_config.focus_duration_sec / 60);
 
     ui_mutex = xSemaphoreCreateMutex();
     if (ui_mutex == NULL) {
@@ -289,6 +325,8 @@ void app_main(void) {
             case SCREEN_ID_MAIN:
                 tick_screen_main();
                 break;
+            case SCREEN_ID_POMO_UI:
+                tick_screen_pomo_ui();
         }
     }
 }

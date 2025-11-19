@@ -20,8 +20,9 @@ enum FlowGlobalVariables {
     FLOW_GLOBAL_VARIABLE_ERROR_HIDDEN = 2,
     FLOW_GLOBAL_VARIABLE_TASKS_HIDDEN = 3,
     FLOW_GLOBAL_VARIABLE_POMO_NAME_TASK = 4,
-    FLOW_GLOBAL_VARIABLE_POMO_TASK_TYPE = 5,
-    FLOW_GLOBAL_VARIABLE_POMO_TIME_PROGRESS = 6
+    FLOW_GLOBAL_VARIABLE_POMO_TASK_CATEGORY = 5,
+    FLOW_GLOBAL_VARIABLE_POMO_TIME_PROGRESS = 6,
+    FLOW_GLOBAL_VARIABLE_CLOCK_TIME = 7
 };
 
 // Native global variables
@@ -36,10 +37,12 @@ extern bool get_var_tasks_hidden();
 extern void set_var_tasks_hidden(bool value);
 extern const char *get_var_pomo_name_task();
 extern void set_var_pomo_name_task(const char *value);
-extern const char *get_var_pomo_task_type();
-extern void set_var_pomo_task_type(const char *value);
+extern const char *get_var_pomo_task_category();
+extern void set_var_pomo_task_category(const char *value);
 extern float get_var_pomo_time_progress();
 extern void set_var_pomo_time_progress(float value);
+extern const char *get_var_clock_time();
+extern void set_var_clock_time(const char *value);
 
 
 #ifdef __cplusplus
