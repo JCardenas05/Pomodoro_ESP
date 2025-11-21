@@ -157,6 +157,18 @@ void create_task_item_ui(const int index, const ws_task_t *task) { // Funcion ll
     task_count++; 
 }
 
+void tick_screen_sw(int screen_index){
+    switch (screen_index)
+    {
+        case SCREEN_ID_MAIN:
+            tick_screen_main();
+            break;
+        case SCREEN_ID_POMO_UI:
+            tick_screen_pomo_ui();
+            break;
+    }
+}
+
 // ----- Actualiza el texto y el color del label de estado de la conexión ------------------
 void update_connection_status_ui(const char* status, bool is_error) {
     if (status_label != NULL) {
@@ -219,8 +231,19 @@ void websocket_task(void *pvParameters) {
     vTaskDelete(NULL);
 }
 
-void handle_interval_end_ui(pomodoro_state_t next_state) {
+void update_pomo_points_ui() {
     lv_obj_t *obj_points[4] = {objects.p_1, objects.p_2, objects.p_3, objects.p_4};
+    uint8_t cycle_count = pomodoro_get_cycle_count();
+    for (int i = 0; i < 4; i++) {
+        if (i < cycle_count) {
+            lv_obj_set_style_bg_opa(obj_points[i], 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+        } else {
+            lv_obj_set_style_bg_opa(obj_points[i], 120, LV_PART_MAIN | LV_STATE_DEFAULT);
+        }
+    }
+}
+
+void handle_interval_end_ui(pomodoro_state_t next_state) {
     remove_style_pomo_focus(objects.pomo_ui);
     remove_style_pomo_pause_st(objects.pomo_ui);
     remove_style_pomo_pause_lg(objects.pomo_ui);
@@ -228,26 +251,27 @@ void handle_interval_end_ui(pomodoro_state_t next_state) {
     uint8_t cycle_count = pomodoro_get_cycle_count();
     switch (current_state) {
         case P_STATE_FOCUS:
+            lv_obj_clear_flag(objects.pomo_points_container, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(objects.pomo_pause, LV_OBJ_FLAG_HIDDEN);
             add_style_pomo_focus(objects.pomo_ui);
             ESP_LOGI(TAG, "Ciclo de enfoque completado: %d", cycle_count);
-            if (cycle_count-1 < 0){
-                for (int i = 0; i < 4; i++) {
-                    lv_obj_set_style_bg_opa(obj_points[i], 120, LV_PART_MAIN | LV_STATE_DEFAULT);
-                }
-            } else {
-                lv_obj_set_style_bg_opa(obj_points[cycle_count-1], 255, LV_PART_MAIN | LV_STATE_DEFAULT);
-            }
+            update_pomo_points_ui();
             break;
         case P_STATE_SHORT_BREAK:
             add_style_pomo_pause_st(objects.pomo_ui);
+            lv_obj_add_flag(objects.pomo_points_container, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(objects.pomo_pause, LV_OBJ_FLAG_HIDDEN);
             break;
         case P_STATE_LONG_BREAK:
             add_style_pomo_pause_lg(objects.pomo_ui);
+            lv_obj_add_flag(objects.pomo_points_container, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_clear_flag(objects.pomo_pause, LV_OBJ_FLAG_HIDDEN);
             break;
         default:
             break;
     }
 }
+
 
 void lvgl_task(void *arg) {
     LCD_Init();
@@ -255,10 +279,12 @@ void lvgl_task(void *arg) {
     LVGL_Init();
     ui_init();
     change_color_theme(0);
+
     ui_message_t received_msg;
+    const TickType_t UI_TICK_FREQ = pdMS_TO_TICKS(50); // 50ms (20 FPS)
 
     while (1) {
-        if (xQueueReceive(ui_event_queue, &received_msg, portMAX_DELAY) == pdTRUE) {       
+        if (xQueueReceive(ui_event_queue, &received_msg, UI_TICK_FREQ) == pdTRUE) {       
             switch (received_msg.type) {
                 case UI_EVENT_INTERVAL_END:
                     handle_interval_end_ui(received_msg.data.pomo_state);
@@ -268,6 +294,8 @@ void lvgl_task(void *arg) {
                     break;
             }
         }
+        lv_timer_handler();
+        tick_screen_sw(current_page);
     }
 }
 
@@ -350,16 +378,4 @@ void app_main(void) {
     xTaskCreate(adc_task, "adc_task", 4096, NULL, 5, NULL);
     
     ESP_LOGI(TAG, "Application started successfully");
-    while (1) {
-        vTaskDelay(pdMS_TO_TICKS(50));
-        lv_timer_handler();
-        switch (current_page)
-        {
-            case SCREEN_ID_MAIN:
-                tick_screen_main();
-                break;
-            case SCREEN_ID_POMO_UI:
-                tick_screen_pomo_ui();
-        }
-    }
 }

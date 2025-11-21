@@ -52,6 +52,7 @@ typedef struct _objects_t {
     lv_obj_t *p_2;
     lv_obj_t *p_3;
     lv_obj_t *p_4;
+    lv_obj_t *pomo_pause;
 } objects_t;
 
 extern objects_t objects;
