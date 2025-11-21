@@ -4,6 +4,8 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h> 
+#include "freertos/FreeRTOS.h"
+#include "freertos/queue.h"
 
 // 1. Estados de la Máquina de Estados Finita (FSM)
 typedef enum {
@@ -32,7 +34,7 @@ typedef void (*pomodoro_callback_t)(pomodoro_state_t finished_state);
  * @param config Puntero a la configuración de los tiempos.
  * @param callback Función que se llamará al finalizar cada intervalo.
  */
-void pomodoro_init(const pomodoro_config_t *config, pomodoro_callback_t callback);
+void pomodoro_init(const pomodoro_config_t *config, QueueHandle_t queue);
 
 /**
  * @brief Inicia el temporizador desde el estado inicial (Focus).
@@ -73,5 +75,11 @@ uint16_t pomodoro_get_remaining_time(void);
  * @return true si la copia fue exitosa, false si el búfer es muy pequeño.
  */
 bool pomodoro_get_time_str(char *buffer, size_t buffer_size);
+
+/**
+ * @brief Obtiene el número de ciclos de enfoque completados de forma segura.
+ * @return Número de ciclos completados.
+ */
+uint8_t pomodoro_get_cycle_count(void);
 
 #endif // POMODORO_H

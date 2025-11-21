@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <string.h>
 #include "esp_log.h"
-#include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/semphr.h" // Necesario para Mutex
+#include "ui_events.h"
 
 #define CLOCK_TIME_SIZE 10
 
@@ -21,6 +21,8 @@ extern float pomo_time_progress;
 
 // Mutex para la seguridad de hilos
 static SemaphoreHandle_t s_pomodoro_mutex;
+
+static QueueHandle_t s_pomodoro_queue;
 
 // --- Funciones Internas ---
 static inline float map_progress(float value, float in_min, float in_max, float out_min, float out_max)
@@ -56,11 +58,9 @@ static void set_new_interval(pomodoro_state_t new_state) {
  */
 static void handle_state_transition() {
     pomodoro_state_t next_state;
-
     if (s_callback) {
         s_callback(s_current_state);
     }
-
     switch (s_current_state) {
         case P_STATE_FOCUS:
             s_cycle_count++;
@@ -83,6 +83,16 @@ static void handle_state_transition() {
         default:
             next_state = P_STATE_STOPPED;
             break;
+    }
+    if (s_pomodoro_queue != NULL) {
+        ui_message_t msg;
+        msg.type = UI_EVENT_INTERVAL_END;
+        msg.data.pomo_state = next_state;
+        if (xQueueSend(ui_event_queue, &msg, pdMS_TO_TICKS(10)) != pdPASS) {
+            ESP_LOGE(TAG, "Failed to send UI event to queue");
+        }
+    } else {
+        ESP_LOGW(TAG, "Pomodoro queue is NULL, skipping UI event send");
     }
     set_new_interval(next_state);
 }
@@ -120,18 +130,18 @@ static void pomodoro_task(void *arg) { //sin Time Drift
 
 // --- API Pública ---
 
-void pomodoro_init(const pomodoro_config_t *config, pomodoro_callback_t callback) {
+void pomodoro_init(const pomodoro_config_t *config, QueueHandle_t queue) {
     if (s_pomodoro_mutex == NULL) {
         s_pomodoro_mutex = xSemaphoreCreateMutex();
     }
 
     if (xSemaphoreTake(s_pomodoro_mutex, portMAX_DELAY) == pdTRUE) {
         memcpy(&s_config, config, sizeof(pomodoro_config_t));
-        s_callback = callback;
         s_current_state = P_STATE_STOPPED;
         s_remaining_time_sec = 0;
         s_cycle_count = 0;
         snprintf(clock_time, CLOCK_TIME_SIZE, "00:00");
+        s_pomodoro_queue = queue;
         xSemaphoreGive(s_pomodoro_mutex);
     }
     
@@ -207,4 +217,13 @@ uint16_t pomodoro_get_remaining_time(void) {
         xSemaphoreGive(s_pomodoro_mutex);
     }
     return time;
+}
+
+uint8_t pomodoro_get_cycle_count(void) {
+    uint8_t count = 0;
+    if (xSemaphoreTake(s_pomodoro_mutex, portMAX_DELAY) == pdTRUE) {
+        count = s_cycle_count;
+        xSemaphoreGive(s_pomodoro_mutex);
+    }
+    return count;
 }

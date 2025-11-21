@@ -540,6 +540,7 @@ void create_screen_pomo_ui() {
                                             lv_obj_set_size(obj, 8, 8);
                                             lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                             lv_obj_set_style_radius(obj, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_bg_opa(obj, 120, LV_PART_MAIN | LV_STATE_DEFAULT);
                                         }
                                         {
                                             // p_2
@@ -549,6 +550,7 @@ void create_screen_pomo_ui() {
                                             lv_obj_set_size(obj, 8, 8);
                                             lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                             lv_obj_set_style_radius(obj, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_bg_opa(obj, 120, LV_PART_MAIN | LV_STATE_DEFAULT);
                                         }
                                         {
                                             // p_3
@@ -558,6 +560,7 @@ void create_screen_pomo_ui() {
                                             lv_obj_set_size(obj, 8, 8);
                                             lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                             lv_obj_set_style_radius(obj, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_bg_opa(obj, 120, LV_PART_MAIN | LV_STATE_DEFAULT);
                                         }
                                         {
                                             // p_4
@@ -567,6 +570,7 @@ void create_screen_pomo_ui() {
                                             lv_obj_set_size(obj, 8, 8);
                                             lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                             lv_obj_set_style_radius(obj, 4, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                            lv_obj_set_style_bg_opa(obj, 120, LV_PART_MAIN | LV_STATE_DEFAULT);
                                         }
                                     }
                                 }

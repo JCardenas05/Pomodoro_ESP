@@ -12,7 +12,7 @@ typedef struct {
     char id[37];  // ID de la tarea en la API
     char text[API_MAX_TASK_TEXT_LEN];
     int priority;
-    uint8_t type;
+    uint8_t category;
 } ws_task_t;
 
 // Estructura para la respuesta de la API
@@ -37,4 +37,4 @@ typedef struct {
 
 void websocket_app_start(const ws_client_config_t *config);
 
-#endif
+#endif 

@@ -219,24 +219,24 @@ void websocket_task(void *pvParameters) {
     vTaskDelete(NULL);
 }
 
-void pomodoro_interval_finished_callback(pomodoro_state_t finished_state) {
-    ui_message_t msg;
-    msg.type = UI_EVENT_INTERVAL_END;
-    msg.data.pomo_state = finished_state;
-    ESP_LOGI(TAG, "--- INTERVALO FINALIZADO ---");
-    if (xQueueSend(ui_event_queue, &msg, pdMS_TO_TICKS(10)) != pdPASS) {
-        ESP_LOGE(TAG, "Failed to send UI event to queue");
-    }
-}
-
-void handle_interval_end_ui() {
+void handle_interval_end_ui(pomodoro_state_t next_state) {
+    lv_obj_t *obj_points[4] = {objects.p_1, objects.p_2, objects.p_3, objects.p_4};
     remove_style_pomo_focus(objects.pomo_ui);
     remove_style_pomo_pause_st(objects.pomo_ui);
     remove_style_pomo_pause_lg(objects.pomo_ui);
-    pomodoro_state_t current_state = pomodoro_get_state();
+    pomodoro_state_t current_state = next_state;
+    uint8_t cycle_count = pomodoro_get_cycle_count();
     switch (current_state) {
         case P_STATE_FOCUS:
             add_style_pomo_focus(objects.pomo_ui);
+            ESP_LOGI(TAG, "Ciclo de enfoque completado: %d", cycle_count);
+            if (cycle_count-1 < 0){
+                for (int i = 0; i < 4; i++) {
+                    lv_obj_set_style_bg_opa(obj_points[i], 120, LV_PART_MAIN | LV_STATE_DEFAULT);
+                }
+            } else {
+                lv_obj_set_style_bg_opa(obj_points[cycle_count-1], 255, LV_PART_MAIN | LV_STATE_DEFAULT);
+            }
             break;
         case P_STATE_SHORT_BREAK:
             add_style_pomo_pause_st(objects.pomo_ui);
@@ -256,11 +256,12 @@ void lvgl_task(void *arg) {
     ui_init();
     change_color_theme(0);
     ui_message_t received_msg;
+
     while (1) {
         if (xQueueReceive(ui_event_queue, &received_msg, portMAX_DELAY) == pdTRUE) {       
             switch (received_msg.type) {
                 case UI_EVENT_INTERVAL_END:
-                    handle_interval_end_ui();
+                    handle_interval_end_ui(received_msg.data.pomo_state);
                     break;
                 case UI_EVENT_START_BUTTON_CLICKED:
                     ESP_LOGI(TAG, "Start button clicked event received");
@@ -284,15 +285,16 @@ void app_main(void) {
     gpio_config(&io_conf);
 
     xTaskCreate(check_button, "check_button", 2048, NULL, 10, NULL);
+    int multiplier = 1;
 
     const pomodoro_config_t my_config = {
-        .focus_duration_sec = 25,         // 25 minutos
-        .short_break_sec = 5,             // 5 minutos
-        .long_break_sec = 15,             // 15 minutos
+        .focus_duration_sec = 5*multiplier,         // 25 minutos
+        .short_break_sec = 2*multiplier,             // 5 minutos
+        .long_break_sec = 3*multiplier,             // 15 minutos
         .cycles_before_long_break = 4          // Pausa larga después de 4 enfoques
     };
 
-    pomodoro_init(&my_config, pomodoro_interval_finished_callback);
+    pomodoro_init(&my_config, ui_event_queue);
     ESP_LOGI(TAG, "Librería Pomodoro inicializada con ciclos de %d minutos.", my_config.focus_duration_sec / 60);
 
     ui_mutex = xSemaphoreCreateMutex();

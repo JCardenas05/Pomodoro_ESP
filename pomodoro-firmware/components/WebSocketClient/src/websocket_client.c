@@ -128,11 +128,11 @@ static void websocket_event_handler(void *handler_args, esp_event_base_t base, i
                 strncpy(task->text, tarea->valuestring, API_MAX_TASK_TEXT_LEN - 1);
                 task->text[API_MAX_TASK_TEXT_LEN - 1] = '\0';   
                 task->priority = cJSON_IsNumber(prioridad) ? prioridad->valueint : 0;
-                task->type = cJSON_IsNumber(category) ? category->valueint : 0;
+                task->category = cJSON_IsNumber(category) ? category->valueint : 0;
 
                 tasks_processed++;
                 ESP_LOGI(TAG, "Added task: %s (ID: %s, priority: %d ,category: %u)",
-                        task->text, task->id, task->priority, task->type);
+                        task->text, task->id, task->priority, task->category);
             }
             cJSON_Delete(json);
             cached_response.task_count = tasks_processed;
