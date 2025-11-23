@@ -37,7 +37,7 @@ def get_conections():
 @router.post("/notion-webhook")
 async def notion_webhook(request: Request, type_from_query: str = Query(None, alias="type")):
     print("Notion Webhook type:", type_from_query)
-    flag = await notion.get_tasks()
+    flag = await notion.get_tasks_api()
     if flag:
         await manager.broadcast(notion.current_tasks)
     return {"status": "ok"}
