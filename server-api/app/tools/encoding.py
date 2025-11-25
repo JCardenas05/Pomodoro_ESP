@@ -1,6 +1,5 @@
 from enum import Enum
 
-
 class StatusNum(Enum):
     pendiente = 1
     en_progreso = 2

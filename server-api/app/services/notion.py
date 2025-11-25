@@ -4,6 +4,7 @@ from app.core.config import Config
 from app.tools.encoding import Encoder, StatusNum
 from app.tools.str_tools import normalize_text
 from enum import Enum, auto
+from app.models.tasks import ResumeTasks
 
 class Property(Enum):
     NAME = "Tarea"
@@ -90,5 +91,19 @@ class Notion:
                 tasks.sort(key=lambda tk: tk["pri"], reverse=False)
                 
         return tasks
+    
+    @classmethod
+    def summary(cls)-> ResumeTasks:
+        tatal_tasks = len(cls.current_tasks)
+        completed_tasks = sum(1 for task in cls.current_tasks if task.get("sts") == StatusNum.completada.value)
+        total_pomodoros = sum(task.get("est", 0) for task in cls.current_tasks)
+        completed_pomodoros = sum(task.get("cmp", 0) for task in cls.current_tasks)
 
+        resume = ResumeTasks(
+            tp=total_pomodoros,
+            cp=completed_pomodoros,
+            tt=tatal_tasks,
+            ct=completed_tasks
+        )
+        return resume
     

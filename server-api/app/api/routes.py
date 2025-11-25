@@ -2,6 +2,7 @@
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Request, Query
 from app.services.notion import Notion, SortMethods
 from app.core.ws_manager import ConnectionManager
+from app.models.tasks import *
 
 manager = ConnectionManager()
 router = APIRouter()
@@ -41,3 +42,9 @@ async def notion_webhook(request: Request, type_from_query: str = Query(None, al
     if flag:
         await manager.broadcast(notion.current_tasks)
     return {"status": "ok"}
+
+@router.get("/summary-tasks", response_model=dict)
+async def summary_tasks():
+    await notion.get_tasks_api()
+    summary_data = Notion.summary()
+    return summary_data.dict()
