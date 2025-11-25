@@ -1,5 +1,7 @@
 #include "task_ui.h"
 
+#define TAG "TASK_UI"
+
 // -------------------- Definiciones ----------------
 task_t tasks[MAX_TASKS];
 int task_count = 0;
@@ -172,4 +174,40 @@ void tick_dynamic_tasks()
             }
         }
     }
+}
+
+//----------Crea y añade un nuevo elemento de tarea a la UI de la lista-------------------
+void upsert_task_ui_item(const ws_task_t *task) { // Funcion llamada desde on_tasks_updated con semaforo
+    if (task == NULL) return;
+
+    if(task_count >= MAX_TASKS){
+        ESP_LOGI(TAG, "Maximo alcanzado");
+        return;
+    }
+
+    if (task_count > 0){
+        for (int j = 0; j < task_count; j++) {
+            if (strcmp(tasks[j].id, task->id) == 0) {
+                ESP_LOGI(TAG, "Tarea ya existe en UI: %s", task->text);
+                tasks[j].priority = get_priority_color(task->priority);
+                tasks[j].category = task->category;
+                strncpy(tasks[j].title, task->text, sizeof(tasks[j].title) - 1);
+                tasks[j].title[sizeof(tasks[j].title) - 1] = '\0';  // Asegurar la terminación
+                tick_dynamic_tasks();
+                return;
+            }
+        }
+    }
+
+    task_widgets[task_count] = create_widget_task(
+        objects.task_list_container,
+        task->text,
+        get_priority_color(task->priority),
+        get_task_icon_data(task->category).icon
+    );
+    strncpy(tasks[task_count].id, task->id, sizeof(tasks[task_count].id) - 1);
+    strncpy(tasks[task_count].title, task->text, sizeof(tasks[task_count].title) - 1);
+    tasks[task_count].priority = get_priority_color(task->priority);
+    tasks[task_count].category = task->category;
+    task_count++; 
 }

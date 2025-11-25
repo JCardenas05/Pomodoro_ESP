@@ -989,7 +989,7 @@ void create_user_widget_progress_arc(lv_obj_t *parent_obj, int startWidgetIndex)
                             ((lv_obj_t **)&objects)[startWidgetIndex + 1] = obj;
                             lv_obj_set_pos(obj, 1, 1);
                             lv_obj_set_size(obj, LV_PCT(99), LV_PCT(99));
-                            lv_arc_set_value(obj, 15);
+                            lv_arc_set_value(obj, 1);
                             lv_arc_set_bg_start_angle(obj, 0);
                             lv_arc_set_bg_end_angle(obj, 360);
                             lv_arc_set_rotation(obj, 270);

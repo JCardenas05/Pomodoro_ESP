@@ -5,6 +5,7 @@
 #include "ui/styles.h"
 #include "lvgl.h"
 #include "esp_log.h"
+#include "websocket_client.h"
 
 #define MAX_TASKS 10
 
@@ -39,5 +40,6 @@ lv_color_t get_priority_color(uint8_t prioridad);
 taskIconData get_task_icon_data(uint8_t categoria);
 task_card_t create_widget_task(lv_obj_t *parent_obj, const char *title, lv_color_t priority_color, const char *type);
 void tick_dynamic_tasks();
+void upsert_task_ui_item(const ws_task_t *task);
 
 #endif // TASK_UI_H
