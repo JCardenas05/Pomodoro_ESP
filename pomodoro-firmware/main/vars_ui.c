@@ -13,6 +13,8 @@ char pomo_task_category[10] = "Trabajo";
 char pomo_name_task[] = "Terminar el informe";
 float pomo_time_progress = 0; // barra de progreso del contador, inicialmente en 0
 char clock_time[CLOCK_TIME_SIZE] = "00:00";
+int32_t task_count_progress = 0; // progreso de tareas completadas, inicialmente 0
+int32_t pomodoro_count_progress = 0; // progreso de pomodoros completados, inicialmente 0
 
 bool get_var_spinner_api() {
     return spinner_api;
@@ -81,6 +83,21 @@ void set_var_clock_time(const char *value) {
     clock_time[sizeof(clock_time) / sizeof(char) - 1] = 0;
 }
 
+int32_t get_var_task_count_progress() {
+    return task_count_progress;
+}
+
+void set_var_task_count_progress(int32_t value) {
+    task_count_progress = value;
+}
+
+int32_t get_var_pomodoro_count_progress() {
+    return pomodoro_count_progress;
+}
+
+void set_var_pomodoro_count_progress(int32_t value) {
+    pomodoro_count_progress = value;
+}
 
 
 

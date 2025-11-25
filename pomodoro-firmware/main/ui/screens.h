@@ -16,8 +16,25 @@ extern groups_t groups;
 void ui_create_groups();
 
 typedef struct _objects_t {
-    lv_obj_t *main;
+    lv_obj_t *dashboard;
+    lv_obj_t *tasks;
     lv_obj_t *pomo_ui;
+    lv_obj_t *w_arc_pomo;
+    lv_obj_t *w_arc_pomo__progress_task_panel_1;
+    lv_obj_t *w_arc_pomo__arc_task_db_1;
+    lv_obj_t *w_arc_pomo__label_task_db_1;
+    lv_obj_t *w_arc_pomo__icon_label;
+    lv_obj_t *w_arc_pomo__text_label;
+    lv_obj_t *w_arc_tasks;
+    lv_obj_t *w_arc_tasks__progress_task_panel_1;
+    lv_obj_t *w_arc_tasks__arc_task_db_1;
+    lv_obj_t *w_arc_tasks__label_task_db_1;
+    lv_obj_t *w_arc_tasks__icon_label;
+    lv_obj_t *w_arc_tasks__text_label;
+    lv_obj_t *obj0;
+    lv_obj_t *obj1;
+    lv_obj_t *obj1__obj0;
+    lv_obj_t *obj1__obj1;
     lv_obj_t *main_container;
     lv_obj_t *task_list_container;
     lv_obj_t *container_error;
@@ -58,12 +75,16 @@ typedef struct _objects_t {
 extern objects_t objects;
 
 enum ScreensEnum {
-    SCREEN_ID_MAIN = 1,
-    SCREEN_ID_POMO_UI = 2,
+    SCREEN_ID_DASHBOARD = 1,
+    SCREEN_ID_TASKS = 2,
+    SCREEN_ID_POMO_UI = 3,
 };
 
-void create_screen_main();
-void tick_screen_main();
+void create_screen_dashboard();
+void tick_screen_dashboard();
+
+void create_screen_tasks();
+void tick_screen_tasks();
 
 void create_screen_pomo_ui();
 void tick_screen_pomo_ui();
@@ -77,6 +98,9 @@ void tick_user_widget_pomo_point(int startWidgetIndex);
 void create_user_widget_progress_item(lv_obj_t *parent_obj, int startWidgetIndex);
 void tick_user_widget_progress_item(int startWidgetIndex);
 
+void create_user_widget_progress_arc(lv_obj_t *parent_obj, int startWidgetIndex);
+void tick_user_widget_progress_arc(int startWidgetIndex);
+
 enum Themes {
     THEME_ID_DARK_THEME,
     THEME_ID_LIGHT_THEME,
@@ -84,9 +108,10 @@ enum Themes {
 enum Colors {
     COLOR_ID_COLOR_BG,
     COLOR_ID_COLOR_CONTAINER,
+    COLOR_ID_PRIMARY_TEXT,
 };
 void change_color_theme(uint32_t themeIndex);
-extern uint32_t theme_colors[2][2];
+extern uint32_t theme_colors[2][3];
 extern uint32_t active_theme_index;
 
 void tick_screen_by_id(enum ScreensEnum screenId);

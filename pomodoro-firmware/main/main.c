@@ -33,8 +33,8 @@ static const char *TAG = "MAIN";
 #define GPIO_INPUT_IO_9     9
 #define GPIO_INPUT_PIN_SEL  ((1ULL<<GPIO_INPUT_IO_9))
 
-uint8_t current_page = SCREEN_ID_MAIN;
-uint8_t num_pages = 2;
+uint8_t current_page = SCREEN_ID_DASHBOARD;
+uint8_t num_pages = 3;
 uint8_t current_section_pomo = P_STATE_FOCUS;
 
 QueueHandle_t ui_event_queue;
@@ -102,7 +102,7 @@ void adc_task(void *arg)
     int adc_scroll_value = 0;
 
     while (1) {
-        if (current_page == SCREEN_ID_MAIN){
+        if (current_page == SCREEN_ID_TASKS) {
             int raw = 0;
             ESP_ERROR_CHECK(adc_oneshot_read(adc_handle, ADC_CHANNEL_0, &raw));
             adc_scroll_value = (int)(map_range(raw, 0, 3200, 0, MAX_TASKS) + 0.5f);
@@ -160,8 +160,11 @@ void create_task_item_ui(const int index, const ws_task_t *task) { // Funcion ll
 void tick_screen_sw(int screen_index){
     switch (screen_index)
     {
-        case SCREEN_ID_MAIN:
-            tick_screen_main();
+        case SCREEN_ID_DASHBOARD:
+            tick_screen_dashboard();
+            break;
+        case SCREEN_ID_TASKS:
+            tick_screen_tasks();
             break;
         case SCREEN_ID_POMO_UI:
             tick_screen_pomo_ui();
@@ -278,7 +281,7 @@ void lvgl_task(void *arg) {
     BK_Light(5);
     LVGL_Init();
     ui_init();
-    change_color_theme(0);
+    change_color_theme(THEME_ID_DARK_THEME);
 
     ui_message_t received_msg;
     const TickType_t UI_TICK_FREQ = pdMS_TO_TICKS(50); // 50ms (20 FPS)
@@ -297,6 +300,26 @@ void lvgl_task(void *arg) {
         lv_timer_handler();
         tick_screen_sw(current_page);
     }
+}
+
+void update_dashboard_ui(api_response_t const* response) {
+    if (response == NULL) {
+        ESP_LOGE(TAG, "Response is NULL");
+        return;
+    }
+    int new_val_tasks = (int)(
+        ((float)response->pyload.summary.completed_tasks) /
+        (response->pyload.summary.total_tasks == 0 ? 1.0f : (float)response->pyload.summary.total_tasks)
+        * 100.0f
+    );
+    int new_val_pomodoros = (int)(
+        ((float)response->pyload.summary.completed_pomodoros) /
+        (response->pyload.summary.total_pomodoros == 0 ? 1.0f : (float)response->pyload.summary.total_pomodoros)
+        * 100.0f
+    );
+    lv_arc_set_value(objects.w_arc_tasks__arc_task_db_1, new_val_tasks);
+    lv_arc_set_value(objects.w_arc_pomo__arc_task_db_1, new_val_pomodoros);
+    ESP_LOGI(TAG, "Dashboard UI updated: Tasks %d%%, Pomodoros %d%%", new_val_tasks, new_val_pomodoros);
 }
 
 // -------------------- Función principal --------------------
@@ -377,7 +400,12 @@ void app_main(void) {
 
     xTaskCreate(adc_task, "adc_task", 4096, NULL, 5, NULL);
 
-    http_get_summary();
-    
+    err = http_get_summary();
+    if (err != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to get summary: %s", esp_err_to_name(err));
+    }
+    api_response_t const* cached_response = api_client_get_cached_response();
+    update_dashboard_ui(cached_response);
+
     ESP_LOGI(TAG, "Application started successfully");
 }

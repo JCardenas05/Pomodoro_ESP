@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-extern const lv_font_t ui_font_material_icons;
+extern const lv_font_t ui_font_material_icons_16;
 extern const lv_font_t ui_font_material_icons_2;
 extern const lv_font_t ui_font_material_icons_1_32;
 

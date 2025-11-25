@@ -55,48 +55,6 @@ esp_err_t api_client_init(const api_client_config_t *config) {
     return ESP_OK;
 }
 
-esp_err_t api_client_update_task_status(int task_id, bool completed) {
-    if (!is_initialized) {
-        return ESP_ERR_INVALID_STATE;
-    }
-
-    // Crear JSON para actualizar el estado
-    cJSON *json = cJSON_CreateObject();
-    cJSON *estado = cJSON_CreateNumber(completed ? 2 : 1);
-    cJSON_AddItemToObject(json, "estado", estado);
-    
-    char *json_string = cJSON_Print(json);
-    if (json_string == NULL) {
-        cJSON_Delete(json);
-        return ESP_ERR_NO_MEM;
-    }
-
-    // Construir URL para la tarea específica
-    char full_url[512];
-    snprintf(full_url, sizeof(full_url), "%s%s/%d", 
-             client_config.base_url, client_config.endpoint, task_id);
-
-    esp_err_t err = perform_http_request(full_url, "PUT", json_string);
-    
-    free(json_string);
-    cJSON_Delete(json);
-
-    if (err == ESP_OK) {
-        ESP_LOGI(TAG, "Task %d status updated to %s", task_id, completed ? "completed" : "pending");
-        // Actualizar caché local
-        for (int i = 0; i < cached_response.pyload.task_list.task_count; i++) {
-            if (cached_response.pyload.task_list.tasks[i].id == task_id) {
-                cached_response.pyload.task_list.tasks[i].completed = completed;
-                break;
-            }
-        }
-    } else {
-        ESP_LOGE(TAG, "Failed to update task %d status", task_id);
-    }
-
-    return err;
-}
-
 static bool parse_summary_response(void) {
     if (http_response_len == 0) {
         ESP_LOGE(TAG, "No data to parse");
@@ -134,7 +92,6 @@ static bool parse_summary_response(void) {
     }
 
     cJSON_Delete(json);
-
     ESP_LOGI(TAG, "Successfully parsed summary response");
     return true;
 }
@@ -148,8 +105,7 @@ esp_err_t http_get_summary(void) {
     ESP_LOGI(TAG, "Fetching summary from API...");
     notify_status_change("Actualizando resumen...", false);
 
-    // Construir URL completa
-    char full_url[512];
+    char full_url[512];  // Construir URL completa
     snprintf(full_url, sizeof(full_url), "%s%s", 
              client_config.base_url, ENDPOINT_SUMMARY);
 
