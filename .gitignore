@@ -55,4 +55,6 @@ partition_table/*.bin
 *.eez-project-ui-state
 
 client.py
+*.ipynb_checkpoints/
+*.ipynb
 

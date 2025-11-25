@@ -25,7 +25,7 @@ idf_component_register(
     REQUIRES 
         Wifi_Connect
         esp_lcd
-        Api_Client
+        HTTPClient
         WebSocketClient
         ADC_Lib
 )

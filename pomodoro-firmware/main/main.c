@@ -11,7 +11,7 @@
 #include "ui/styles.h"
 #include "task_ui.h"
 #include "wifi_connect.h"
-#include "api_client.h"
+#include "http_client.h"
 #include "websocket_client.h"
 #include "vars_ui.c"
 #include "adc_lib.h"
@@ -313,12 +313,12 @@ void app_main(void) {
     gpio_config(&io_conf);
 
     xTaskCreate(check_button, "check_button", 2048, NULL, 10, NULL);
-    int multiplier = 1;
+    int multiplier = 60;
 
     const pomodoro_config_t my_config = {
-        .focus_duration_sec = 5*multiplier,         // 25 minutos
-        .short_break_sec = 2*multiplier,             // 5 minutos
-        .long_break_sec = 3*multiplier,             // 15 minutos
+        .focus_duration_sec = 25*multiplier,         // 25 minutos
+        .short_break_sec = 5*multiplier,             // 5 minutos
+        .long_break_sec = 15*multiplier,             // 15 minutos
         .cycles_before_long_break = 4          // Pausa larga después de 4 enfoques
     };
 
@@ -376,6 +376,8 @@ void app_main(void) {
     ESP_LOGI(TAG, "Free heap: %lu bytes", esp_get_free_heap_size());
 
     xTaskCreate(adc_task, "adc_task", 4096, NULL, 5, NULL);
+
+    http_get_summary();
     
     ESP_LOGI(TAG, "Application started successfully");
 }
