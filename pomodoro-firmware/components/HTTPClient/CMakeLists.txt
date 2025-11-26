@@ -7,5 +7,7 @@ idf_component_register(
         esp_http_client
         esp_common
         freertos
+        mbedtls
+        esp-tls
         json
 )
