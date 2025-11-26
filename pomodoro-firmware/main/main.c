@@ -21,13 +21,13 @@
 
 static const char *TAG = "MAIN";
 
-#define SERVER_HOTS_IP "136.119.200.119:8000"
+#define SERVER_HOST "j-cardenas.com"
 
-#define API_BASE_URL "http://" SERVER_HOTS_IP // URL base del servidor de la API
+#define API_BASE_URL "https://" SERVER_HOST // URL base del servidor de la API
 #define API_ENDPOINT "/tasks"
 
 #define NO_DATA_TIMEOUT_SEC 120
-#define WS_BASE_URL "ws://" SERVER_HOTS_IP // URL base del servidor WebSocket
+#define WS_BASE_URL "wss://" SERVER_HOST // URL base del servidor WebSocket
 #define WS_ENDPOINT "/ws"
 
 #define GPIO_INPUT_IO_9     9
@@ -289,7 +289,7 @@ void update_dashboard_ui(api_response_t const* response) {
 void app_main(void) {
 
     ui_event_queue = xQueueCreate(10, sizeof(ui_message_t));
-    xTaskCreate(lvgl_task, "LVGL_UI", 4096, NULL, 5, NULL);
+    xTaskCreate(lvgl_task, "LVGL_UI", 4096, NULL, 4, NULL);
 
     gpio_config_t io_conf = {};
     io_conf.intr_type = GPIO_INTR_POSEDGE;
@@ -298,7 +298,7 @@ void app_main(void) {
     io_conf.pull_up_en = 1;
     gpio_config(&io_conf);
 
-    xTaskCreate(check_button, "check_button", 2048, NULL, 10, NULL);
+    xTaskCreate(check_button, "check_button", 2048, NULL, 2, NULL);
     int multiplier = 60;
 
     const pomodoro_config_t my_config = {
@@ -361,7 +361,7 @@ void app_main(void) {
 
     ESP_LOGI(TAG, "Free heap: %lu bytes", esp_get_free_heap_size());
 
-    xTaskCreate(adc_task, "adc_task", 4096, NULL, 5, NULL);
+    xTaskCreate(adc_task, "adc_task", 4096, NULL, 3, NULL);
 
     err = http_get_summary();
     if (err != ESP_OK) {

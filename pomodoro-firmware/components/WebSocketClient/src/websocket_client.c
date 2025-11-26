@@ -8,6 +8,7 @@
 #include "freertos/timers.h"
 #include <string.h>
 #include <stdio.h>
+#include "esp_crt_bundle.h"
 
 static const char *TAG = "WS_CLIENT";
 static TimerHandle_t shutdown_signal_timer;
@@ -173,7 +174,7 @@ void websocket_app_start(const ws_client_config_t *config)
     snprintf(full_url, sizeof(full_url), "%s%s", client_config.base_url, client_config.endpoint);
     websocket_cfg.uri = full_url;
     websocket_cfg.buffer_size = 2048;
-    //websocket_cfg.crt_bundle_attach = esp_crt_bundle_attach;
+    websocket_cfg.crt_bundle_attach = esp_crt_bundle_attach;
 
     ESP_LOGI(TAG, "Connecting to %s...", websocket_cfg.uri);
 

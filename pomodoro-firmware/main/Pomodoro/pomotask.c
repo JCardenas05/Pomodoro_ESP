@@ -146,7 +146,7 @@ void pomodoro_init(const pomodoro_config_t *config, QueueHandle_t queue) {
     }
     
     if (xTaskGetHandle("PomodoroTask") == NULL) {
-        xTaskCreate(pomodoro_task, "PomodoroTask", 2048, NULL, 5, NULL);
+        xTaskCreate(pomodoro_task, "PomodoroTask", 2048, NULL, 3, NULL);
     }
 }
 

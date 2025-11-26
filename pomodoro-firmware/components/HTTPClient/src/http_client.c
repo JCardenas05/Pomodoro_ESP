@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include "esp_err.h"
+#include "esp_crt_bundle.h"
 
 #define ENDPOINT_TASKS "/tasks"
 #define ENDPOINT_SUMMARY "/summary-tasks"
@@ -200,6 +201,7 @@ static esp_err_t perform_http_request(const char *url, const char *method, const
         .event_handler = http_event_handler,
         .timeout_ms = client_config.timeout_ms > 0 ? client_config.timeout_ms : 10000,
         .buffer_size = HTTP_RESPONSE_BUFFER_SIZE,
+        .crt_bundle_attach = esp_crt_bundle_attach,
     };
 
     esp_http_client_handle_t client = esp_http_client_init(&config);
