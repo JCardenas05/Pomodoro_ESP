@@ -8,12 +8,14 @@
 
 typedef enum {
     UI_EVENT_INTERVAL_END,
-    UI_EVENT_START_BUTTON_CLICKED
+    UI_EVENT_START_BUTTON_CLICKED,
+    UI_EVENT_SWITCH_SCREEN,
+    UI_EVENT_DASHBOARD_DATA_READY
 } ui_event_type_t;
 
 typedef struct {
     pomodoro_state_t pomo_state;
-    int input_value;
+    int value;
 } ui_event_data_t;
 
 typedef struct {

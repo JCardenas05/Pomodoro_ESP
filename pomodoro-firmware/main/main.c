@@ -52,13 +52,83 @@ static inline float map_range(float value, float in_min, float in_max, float out
     return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
 
-void set_task_pomo(){
-    set_var_pomo_name_task(tasks[selected_task].title);
-    set_var_pomo_task_category(get_task_icon_data(tasks[selected_task].category).name);
+void update_dashboard_ui(api_response_t const* response) {
+    if (response == NULL) {
+        ESP_LOGE(TAG, "Response is NULL");
+        return;
+    }
+    int new_val_tasks = (int)(
+        ((float)response->pyload.summary.completed_tasks) /
+        (response->pyload.summary.total_tasks == 0 ? 1.0f : (float)response->pyload.summary.total_tasks)
+        * 100.0f
+    );
+    int new_val_pomodoros = (int)(
+        ((float)response->pyload.summary.completed_pomodoros) /
+        (response->pyload.summary.total_pomodoros == 0 ? 1.0f : (float)response->pyload.summary.total_pomodoros)
+        * 100.0f
+    );
+    lv_arc_set_value(objects.w_arc_tasks__arc_task_db_1, new_val_tasks);
+    lv_arc_set_value(objects.w_arc_pomo__arc_task_db_1, new_val_pomodoros);
+    ESP_LOGI(TAG, "Dashboard UI updated: Tasks %d%%, Pomodoros %d%%", new_val_tasks, new_val_pomodoros);
+}
+
+void fetch_dashboard_data_task(void *pvParameters) {
+    ESP_LOGI("NET_TASK", "Iniciando solicitud HTTP para Dashboard...");
+    esp_err_t err = http_get_summary();
+    if (err != ESP_OK) {
+        ESP_LOGE("NET_TASK", "Fallo al obtener resumen: %s", esp_err_to_name(err));
+    }
+    ui_message_t msg = {
+        .type = UI_EVENT_DASHBOARD_DATA_READY,
+    };
+    if (xQueueSend(ui_event_queue, &msg, 0) != pdPASS) {
+        ESP_LOGE("NET_TASK", "Fallo al enviar evento a la cola de UI.");
+    }
+    ESP_LOGI("NET_TASK", "Tarea de red finalizada. Eliminando...");
+    vTaskDelete(NULL);
+}
+
+esp_err_t start_dashboard_data_fetch() {
+    BaseType_t xReturned;
+    xReturned = xTaskCreate(fetch_dashboard_data_task, "DashboardFetch", 4096, NULL, 3, NULL);
+    if (xReturned != pdPASS) {
+        ESP_LOGE("MAIN", "Error al crear la tarea de red.");
+        return ESP_FAIL;
+    }
+    return ESP_OK;
+}
+
+static void switch_screen(uint8_t screen_id) {
+    esp_err_t err;
+    current_page = screen_id;
+    loadScreen(current_page);
+    switch (screen_id) {
+    case SCREEN_ID_DASHBOARD:
+        start_dashboard_data_fetch();
+        break;  
+    case SCREEN_ID_TASKS:
+        break;
+    case SCREEN_ID_POMO_UI:
+        set_var_pomo_name_task(tasks[selected_task].title);
+        set_var_pomo_task_category(get_task_icon_data(tasks[selected_task].category).name);
+        pomodoro_start();
+        break;
+    default:
+        ESP_LOGI(TAG, "Screen ID %d not implemented", screen_id);
+        break;
+    }
 }
 
 static void check_button(void *arg)
 {
+    static const char *TAG = "BUTTON_TASK";
+    gpio_config_t io_conf = {};
+    io_conf.intr_type = GPIO_INTR_POSEDGE;
+    io_conf.pin_bit_mask = GPIO_INPUT_PIN_SEL;
+    io_conf.mode = GPIO_MODE_INPUT;
+    io_conf.pull_up_en = 1;
+    gpio_config(&io_conf);
+
     bool prev_state = 0; // to debounce
     bool curr_state = 0;
     while (1)
@@ -68,10 +138,15 @@ static void check_button(void *arg)
         {
             current_page = (current_page % num_pages) + 1;
             ESP_LOGI(TAG, "Button pressed - Switching to page %d", current_page);
-            set_task_pomo();
-            loadScreen(current_page);
-            if (current_page == SCREEN_ID_POMO_UI){
-                pomodoro_start();
+            if (ui_event_queue != NULL) {
+                ui_message_t msg;
+                msg.type = UI_EVENT_SWITCH_SCREEN;
+                msg.data.value = current_page;
+                if (xQueueSend(ui_event_queue, &msg, pdMS_TO_TICKS(10)) != pdPASS) {
+                    ESP_LOGE(TAG, "Failed to send UI event to queue");
+                }
+            } else {
+                ESP_LOGW(TAG, "UI event queue is NULL, skipping UI event send");
             }
         }
         prev_state = curr_state;
@@ -240,6 +315,7 @@ void handle_interval_end_ui(pomodoro_state_t next_state) {
 
 
 void lvgl_task(void *arg) {
+    static const char *TAG = "LVGL_TASK";
     LCD_Init();
     BK_Light(5);
     LVGL_Init();
@@ -258,49 +334,30 @@ void lvgl_task(void *arg) {
                 case UI_EVENT_START_BUTTON_CLICKED:
                     ESP_LOGI(TAG, "Start button clicked event received");
                     break;
+                case UI_EVENT_SWITCH_SCREEN:
+                    ESP_LOGI(TAG, "Switch screen event received: %d", received_msg.data.value);
+                    switch_screen(received_msg.data.value);
+                    break;
+                case UI_EVENT_DASHBOARD_DATA_READY:
+                    ESP_LOGI(TAG, "Dashboard data ready event received");
+                    api_response_t const* cached_response = api_client_get_cached_response();
+                    update_dashboard_ui(cached_response);
+                    break;
             }
         }
         lv_timer_handler();
         tick_screen_sw(current_page);
     }
 }
-
-void update_dashboard_ui(api_response_t const* response) {
-    if (response == NULL) {
-        ESP_LOGE(TAG, "Response is NULL");
-        return;
-    }
-    int new_val_tasks = (int)(
-        ((float)response->pyload.summary.completed_tasks) /
-        (response->pyload.summary.total_tasks == 0 ? 1.0f : (float)response->pyload.summary.total_tasks)
-        * 100.0f
-    );
-    int new_val_pomodoros = (int)(
-        ((float)response->pyload.summary.completed_pomodoros) /
-        (response->pyload.summary.total_pomodoros == 0 ? 1.0f : (float)response->pyload.summary.total_pomodoros)
-        * 100.0f
-    );
-    lv_arc_set_value(objects.w_arc_tasks__arc_task_db_1, new_val_tasks);
-    lv_arc_set_value(objects.w_arc_pomo__arc_task_db_1, new_val_pomodoros);
-    ESP_LOGI(TAG, "Dashboard UI updated: Tasks %d%%, Pomodoros %d%%", new_val_tasks, new_val_pomodoros);
-}
-
 // -------------------- Función principal --------------------
 void app_main(void) {
 
     ui_event_queue = xQueueCreate(10, sizeof(ui_message_t));
     xTaskCreate(lvgl_task, "LVGL_UI", 4096, NULL, 4, NULL);
 
-    gpio_config_t io_conf = {};
-    io_conf.intr_type = GPIO_INTR_POSEDGE;
-    io_conf.pin_bit_mask = GPIO_INPUT_PIN_SEL;
-    io_conf.mode = GPIO_MODE_INPUT;
-    io_conf.pull_up_en = 1;
-    gpio_config(&io_conf);
-
     xTaskCreate(check_button, "check_button", 2048, NULL, 2, NULL);
-    int multiplier = 60;
 
+    int multiplier = 60;
     const pomodoro_config_t my_config = {
         .focus_duration_sec = 25*multiplier,         // 25 minutos
         .short_break_sec = 5*multiplier,             // 5 minutos
@@ -309,7 +366,6 @@ void app_main(void) {
     };
 
     pomodoro_init(&my_config, ui_event_queue);
-    ESP_LOGI(TAG, "Librería Pomodoro inicializada con ciclos de %d minutos.", my_config.focus_duration_sec / 60);
 
     ui_mutex = xSemaphoreCreateMutex();
     if (ui_mutex == NULL) {
@@ -362,13 +418,5 @@ void app_main(void) {
     ESP_LOGI(TAG, "Free heap: %lu bytes", esp_get_free_heap_size());
 
     xTaskCreate(adc_task, "adc_task", 4096, NULL, 3, NULL);
-
-    err = http_get_summary();
-    if (err != ESP_OK) {
-        ESP_LOGE(TAG, "Failed to get summary: %s", esp_err_to_name(err));
-    }
-    api_response_t const* cached_response = api_client_get_cached_response();
-    update_dashboard_ui(cached_response);
-
     ESP_LOGI(TAG, "Application started successfully");
 }
