@@ -1,7 +1,6 @@
 #include "wifi_connect.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/event_groups.h"
-#include "esp_wifi.h"
 #include "esp_event.h"
 #include "esp_log.h"
 #include "nvs_flash.h"
@@ -13,10 +12,15 @@
 static const char *TAG = "wifi_connect";
 static EventGroupHandle_t s_wifi_event_group;
 
+callback_event_t wifi_status_callback = NULL;
+
 static void wifi_event_handler(void *arg, esp_event_base_t event_base,
                                int32_t event_id, void *event_data) {
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
         esp_wifi_connect();
+        if (wifi_status_callback) {
+            wifi_status_callback(event_id);
+        }
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
         esp_wifi_connect();
         ESP_LOGI(TAG, "Reconnecting to WiFi...");
@@ -26,7 +30,8 @@ static void wifi_event_handler(void *arg, esp_event_base_t event_base,
     }
 }
 
-esp_err_t wifi_connect_sta(const char *ssid, const char *pass) {
+esp_err_t wifi_connect_sta(const char *ssid, const char *pass, callback_event_t callback_event) {
+    wifi_status_callback = callback_event;
     ESP_ERROR_CHECK(nvs_flash_init());
 
     s_wifi_event_group = xEventGroupCreate();
@@ -58,6 +63,9 @@ esp_err_t wifi_connect_sta(const char *ssid, const char *pass) {
 
     if (bits & WIFI_CONNECTED_BIT) {
         ESP_LOGI(TAG, "Connected to WiFi network: %s", ssid);
+        if (wifi_status_callback) {
+            wifi_status_callback(WIFI_EVENT_STA_CONNECTED);
+        }
         return ESP_OK;
     } else {
         ESP_LOGE(TAG, "Failed to connect to WiFi.");

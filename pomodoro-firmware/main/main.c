@@ -47,6 +47,38 @@ static adc_oneshot_unit_handle_t adc_handle;
 
 static SemaphoreHandle_t ui_mutex = NULL;
 
+typedef enum {
+    WIFI_CONNECTED,
+    WIFI_CONNECTING,
+    WIFI_DISCONNECTED,
+    WIFI_ERROR,
+
+} ui_wifi_status_t;
+
+const char *wifi_icons[] = {
+    "\ue63e", // Connected
+    "\ue4ca", // Connecting
+    "\uef1b", // ERROR
+    "\ue648"  // Disconnected
+};
+
+volatile bool wifi_connecting = false;
+uint8_t  wifi_icon_blink_status = COLOR_ID_DISABLED_COLOR;
+lv_timer_t *blink_timer;
+uint8_t i_connecting_icon = 0;
+
+void wifi_icon_blink_cb(lv_timer_t * timer){
+    uint8_t next_color = (wifi_icon_blink_status == COLOR_ID_DISABLED_COLOR) ? COLOR_ID_COLOR_TEXT_DB : COLOR_ID_DISABLED_COLOR;
+    wifi_icon_blink_status = next_color;
+    lv_obj_set_style_text_color(objects.wifi_connection, lv_color_hex(theme_colors[active_theme_index][wifi_icon_blink_status]), LV_PART_MAIN | LV_STATE_DEFAULT);
+}
+
+void animate_wifi_connecting_icon() {
+    static const char *conecting_icons[] = {"\ue4ca", "\ue4d9", "\ue63e"};
+    lv_label_set_text(objects.wifi_connection, conecting_icons[i_connecting_icon]);
+    i_connecting_icon = (i_connecting_icon + 1) % 3;
+}
+
 static inline float map_range(float value, float in_min, float in_max, float out_min, float out_max)
 {
     return (value - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
@@ -67,8 +99,8 @@ void update_dashboard_ui(api_response_t const* response) {
         (response->pyload.summary.total_pomodoros == 0 ? 1.0f : (float)response->pyload.summary.total_pomodoros)
         * 100.0f
     );
-    lv_arc_set_value(objects.w_arc_tasks__arc_task_db_1, new_val_tasks);
-    lv_arc_set_value(objects.w_arc_pomo__arc_task_db_1, new_val_pomodoros);
+    lv_arc_set_value(objects.w_arc_tasks__arc, new_val_tasks);
+    lv_arc_set_value(objects.w_arc_pomo__arc, new_val_pomodoros);
     ESP_LOGI(TAG, "Dashboard UI updated: Tasks %d%%, Pomodoros %d%%", new_val_tasks, new_val_pomodoros);
 }
 
@@ -99,7 +131,6 @@ esp_err_t start_dashboard_data_fetch() {
 }
 
 static void switch_screen(uint8_t screen_id) {
-    esp_err_t err;
     current_page = screen_id;
     loadScreen(current_page);
     switch (screen_id) {
@@ -317,10 +348,12 @@ void handle_interval_end_ui(pomodoro_state_t next_state) {
 void lvgl_task(void *arg) {
     static const char *TAG = "LVGL_TASK";
     LCD_Init();
-    BK_Light(5);
+    BK_Light(10);
     LVGL_Init();
     ui_init();
     change_color_theme(THEME_ID_DARK_THEME);
+    lv_obj_set_style_arc_color(objects.w_arc_pomo__arc, lv_color_hex(0xffe32929), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_label_set_text(objects.wifi_connection, wifi_icons[WIFI_CONNECTED]);
 
     ui_message_t received_msg;
     const TickType_t UI_TICK_FREQ = pdMS_TO_TICKS(50); // 50ms (20 FPS)
@@ -349,6 +382,34 @@ void lvgl_task(void *arg) {
         tick_screen_sw(current_page);
     }
 }
+
+void wifi_event_handler(uint32_t event_id) {
+    ESP_LOGI(TAG, "WiFi event received: %d", (int) event_id);
+    switch (event_id) {
+        case WIFI_EVENT_STA_START:
+            wifi_connecting = true;
+            if (blink_timer == NULL) {
+                blink_timer = lv_timer_create(animate_wifi_connecting_icon, 500, NULL);
+            }
+            break;
+        case WIFI_EVENT_STA_DISCONNECTED:
+            wifi_connecting = false;
+            lv_label_set_text(objects.wifi_connection, wifi_icons[WIFI_DISCONNECTED]);
+            break;
+        case WIFI_EVENT_STA_CONNECTED:
+            wifi_connecting = false;
+            if (blink_timer != NULL) {
+                lv_timer_del(blink_timer);
+                blink_timer = NULL;
+            }
+            lv_label_set_text(objects.wifi_connection, wifi_icons[WIFI_CONNECTED]);
+            break;
+        default:
+            ESP_LOGW(TAG, "Unhandled WiFi event");
+            break;
+    }
+}
+
 // -------------------- Función principal --------------------
 void app_main(void) {
 
@@ -375,7 +436,7 @@ void app_main(void) {
 
     const char *ssid = "HERRERA";
     const char *pass = "$krdenas-05";
-    if (wifi_connect_sta(ssid, pass) != ESP_OK) {
+    if (wifi_connect_sta(ssid, pass, wifi_event_handler) != ESP_OK) {
         ESP_LOGE(TAG, "WiFi connection failed");
         return;
     }

@@ -28,8 +28,8 @@ typedef void (*ws_net_error_cb_t)(const char *message, bool is_error);
 
 // Configuración del cliente API
 typedef struct {
-    char base_url[100];
-    char endpoint[20];
+    char base_url[30];
+    char endpoint[30];
     int timeout_sec;
     ws_tasks_updated_cb_t tasks_callback; //funcion que se llama cuando se reciben datos 
     ws_net_error_cb_t ws_error_callback; //funcion que se llama cuando hay un error

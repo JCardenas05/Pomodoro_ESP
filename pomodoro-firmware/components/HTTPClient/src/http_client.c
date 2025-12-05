@@ -106,7 +106,7 @@ esp_err_t http_get_summary(void) {
     ESP_LOGI(TAG, "Fetching summary from API...");
     notify_status_change("Actualizando resumen...", false);
 
-    char full_url[512];  // Construir URL completa
+    char full_url[60];  // Construir URL completa
     snprintf(full_url, sizeof(full_url), "%s%s", 
              client_config.base_url, ENDPOINT_SUMMARY);
 

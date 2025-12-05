@@ -50,8 +50,8 @@ typedef void (*api_status_changed_cb_t)(const char *status, bool is_error);
 
 // Configuración del cliente API
 typedef struct {
-    char base_url[256];
-    char endpoint[64];
+    char base_url[30];
+    char endpoint[30];
     int timeout_ms;
     api_tasks_updated_cb_t tasks_callback;
     api_status_changed_cb_t status_callback;

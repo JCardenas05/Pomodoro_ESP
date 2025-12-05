@@ -19,22 +19,25 @@ typedef struct _objects_t {
     lv_obj_t *dashboard;
     lv_obj_t *tasks;
     lv_obj_t *pomo_ui;
+    lv_obj_t *obj0;
+    lv_obj_t *obj1;
     lv_obj_t *w_arc_pomo;
     lv_obj_t *w_arc_pomo__progress_task_panel_1;
-    lv_obj_t *w_arc_pomo__arc_task_db_1;
-    lv_obj_t *w_arc_pomo__label_task_db_1;
+    lv_obj_t *w_arc_pomo__arc;
+    lv_obj_t *w_arc_pomo__label;
     lv_obj_t *w_arc_pomo__icon_label;
     lv_obj_t *w_arc_pomo__text_label;
     lv_obj_t *w_arc_tasks;
     lv_obj_t *w_arc_tasks__progress_task_panel_1;
-    lv_obj_t *w_arc_tasks__arc_task_db_1;
-    lv_obj_t *w_arc_tasks__label_task_db_1;
+    lv_obj_t *w_arc_tasks__arc;
+    lv_obj_t *w_arc_tasks__label;
     lv_obj_t *w_arc_tasks__icon_label;
     lv_obj_t *w_arc_tasks__text_label;
-    lv_obj_t *obj0;
-    lv_obj_t *obj1;
-    lv_obj_t *obj1__obj0;
-    lv_obj_t *obj1__obj1;
+    lv_obj_t *wifi_connection;
+    lv_obj_t *obj2;
+    lv_obj_t *obj3;
+    lv_obj_t *obj3__obj0;
+    lv_obj_t *obj3__obj1;
     lv_obj_t *main_container;
     lv_obj_t *task_list_container;
     lv_obj_t *container_error;
@@ -109,9 +112,11 @@ enum Colors {
     COLOR_ID_COLOR_BG,
     COLOR_ID_COLOR_CONTAINER,
     COLOR_ID_PRIMARY_TEXT,
+    COLOR_ID_COLOR_TEXT_DB,
+    COLOR_ID_DISABLED_COLOR,
 };
 void change_color_theme(uint32_t themeIndex);
-extern uint32_t theme_colors[2][3];
+extern uint32_t theme_colors[2][5];
 extern uint32_t active_theme_index;
 
 void tick_screen_by_id(enum ScreensEnum screenId);

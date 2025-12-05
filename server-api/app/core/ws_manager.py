@@ -3,7 +3,6 @@ from typing import Dict
 import uuid
 import json
 
-# Gestor simple de conexiones
 class ConnectionManager:
     def __init__(self):
         self.active_connections: Dict[str, WebSocket] = {}
