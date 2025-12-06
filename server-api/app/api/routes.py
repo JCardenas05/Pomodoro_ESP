@@ -19,10 +19,8 @@ async def read_tareas():
 async def websocket_endpoint(websocket: WebSocket):
     client_id = await manager.connect(websocket)
     current_tasks = notion.get_task(limit=50, sort=SortMethods.EXCLUDE_DONE)
-
     if current_tasks:
         await websocket.send_json(current_tasks)
-
     try:
         while True:
             data = await websocket.receive_text()

@@ -5,6 +5,7 @@ from app.tools.encoding import Encoder, StatusNum
 from app.tools.str_tools import normalize_text
 from enum import Enum, auto
 from app.models.tasks import ResumeTasks
+from collections import Counter
 
 class Property(Enum):
     NAME = "Tarea"
@@ -81,9 +82,10 @@ class Notion:
         return False
     
     @classmethod
-    def get_task(cls, limit: int, offset: int=0, sort: SortMethods=SortMethods.NONE):
+    def get_task(cls, limit: int=None, offset: int=0, sort: SortMethods=SortMethods.NONE):
         tasks = []
-        tasks=cls.current_tasks[:limit]
+        tasks=cls.current_tasks[:limit] if limit else cls.current_tasks.copy()
+        tasks=tasks[offset:offset+limit] if offset else tasks
         match sort:
             case SortMethods.EXCLUDE_DONE:
                 print("Aplicando Exclude")
@@ -99,11 +101,18 @@ class Notion:
         total_pomodoros = sum(task.get("est", 0) for task in cls.current_tasks)
         completed_pomodoros = sum(task.get("cmp", 0) for task in cls.current_tasks)
 
+
+        t = cls.get_task(sort=SortMethods.EXCLUDE_DONE)
+        top_3_cat = [task['cat'] for task in t]; print(top_3_cat)
+        top_3_cat = Counter(top_3_cat).most_common(3)
+        top_3_cat = {cat: count for cat, count in top_3_cat}
+
         resume = ResumeTasks(
             tp=total_pomodoros,
             cp=completed_pomodoros,
             tt=tatal_tasks,
-            ct=completed_tasks
+            ct=completed_tasks,
+            t3=top_3_cat
         )
         return resume
     

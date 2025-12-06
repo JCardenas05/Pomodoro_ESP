@@ -20,6 +20,9 @@ class CategoryNum(Enum):
     trabajo = 2
     hogar = 3
     personal = 4
+    salud = 5
+    ocio = 6
+    finanzas = 7
 
 class Encoder:
     mapping_status = {
@@ -40,7 +43,10 @@ class Encoder:
         'estudios': CategoryNum.estudios,
         'trabajo': CategoryNum.trabajo,
         'hogar': CategoryNum.hogar,
-        'personal': CategoryNum.personal
+        'personal': CategoryNum.personal,
+        'salud': CategoryNum.salud,
+        'ocio': CategoryNum.ocio,
+        'finanzas': CategoryNum.finanzas
     }
 
     @staticmethod
