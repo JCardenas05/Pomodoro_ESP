@@ -101,6 +101,10 @@ void update_dashboard_ui(api_response_t const* response) {
     );
     lv_arc_set_value(objects.w_arc_tasks__arc, new_val_tasks);
     lv_arc_set_value(objects.w_arc_pomo__arc, new_val_pomodoros);
+    for (int i = 0; i < response->pyload.summary.top_count; i++) {
+        upsert_category_top_ui(objects.cat_top, response->pyload.summary.top[i].category, 15);
+    }
+    
     ESP_LOGI(TAG, "Dashboard UI updated: Tasks %d%%, Pomodoros %d%%", new_val_tasks, new_val_pomodoros);
 }
 
@@ -344,6 +348,11 @@ void handle_interval_end_ui(pomodoro_state_t next_state) {
     }
 }
 
+void custom_ui(){
+    lv_obj_set_style_arc_color(objects.w_arc_pomo__arc, lv_color_hex(0xffe32929), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+    lv_label_set_text(objects.wifi_connection, wifi_icons[WIFI_CONNECTED]);
+    lv_label_set_text(objects.w_arc_tasks__icon_label, "\ue2e6");
+}
 
 void lvgl_task(void *arg) {
     static const char *TAG = "LVGL_TASK";
@@ -352,8 +361,7 @@ void lvgl_task(void *arg) {
     LVGL_Init();
     ui_init();
     change_color_theme(THEME_ID_DARK_THEME);
-    lv_obj_set_style_arc_color(objects.w_arc_pomo__arc, lv_color_hex(0xffe32929), LV_PART_INDICATOR | LV_STATE_DEFAULT);
-    lv_label_set_text(objects.wifi_connection, wifi_icons[WIFI_CONNECTED]);
+    custom_ui();
 
     ui_message_t received_msg;
     const TickType_t UI_TICK_FREQ = pdMS_TO_TICKS(50); // 50ms (20 FPS)

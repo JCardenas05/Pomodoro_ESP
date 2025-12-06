@@ -34,10 +34,10 @@ typedef struct _objects_t {
     lv_obj_t *w_arc_tasks__icon_label;
     lv_obj_t *w_arc_tasks__text_label;
     lv_obj_t *wifi_connection;
+    lv_obj_t *cat_summary;
     lv_obj_t *obj2;
     lv_obj_t *obj3;
-    lv_obj_t *obj3__obj0;
-    lv_obj_t *obj3__obj1;
+    lv_obj_t *cat_top;
     lv_obj_t *main_container;
     lv_obj_t *task_list_container;
     lv_obj_t *container_error;
@@ -103,6 +103,9 @@ void tick_user_widget_progress_item(int startWidgetIndex);
 
 void create_user_widget_progress_arc(lv_obj_t *parent_obj, int startWidgetIndex);
 void tick_user_widget_progress_arc(int startWidgetIndex);
+
+void create_user_widget_progress_item_db(lv_obj_t *parent_obj, int startWidgetIndex);
+void tick_user_widget_progress_item_db(int startWidgetIndex);
 
 enum Themes {
     THEME_ID_DARK_THEME,
