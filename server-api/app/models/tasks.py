@@ -11,4 +11,4 @@ class ResumeTasks(BaseModel):
     cp: int # completed_pomodoros
     tt: int # total_tasks
     ct: int # completed_tasks
-    t3: dict # top 3 categories
+    t3: list[dict]

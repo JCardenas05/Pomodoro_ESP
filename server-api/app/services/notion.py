@@ -105,7 +105,7 @@ class Notion:
         t = cls.get_task(sort=SortMethods.EXCLUDE_DONE)
         top_3_cat = [task['cat'] for task in t]; print(top_3_cat)
         top_3_cat = Counter(top_3_cat).most_common(3)
-        top_3_cat = {cat: count for cat, count in top_3_cat}
+        top_3_cat = [{"k": cat, "v": count} for cat, count in top_3_cat]
 
         resume = ResumeTasks(
             tp=total_pomodoros,
