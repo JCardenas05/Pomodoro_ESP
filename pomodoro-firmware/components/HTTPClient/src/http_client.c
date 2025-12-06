@@ -78,6 +78,9 @@ static bool parse_summary_response(void) {
     cJSON *completed_tasks = cJSON_GetObjectItem(json, "ct");
     cJSON *total_pomodoros = cJSON_GetObjectItem(json, "tp");
     cJSON *completed_pomodoros = cJSON_GetObjectItem(json, "cp");
+    cJSON *top = cJSON_GetObjectItem(json, "t3");
+
+    cached_response.pyload.summary.top_count = cJSON_GetArraySize(top);
 
     if (cJSON_IsNumber(total_tasks)) {
         cached_response.pyload.summary.total_tasks = total_tasks->valueint;
@@ -91,6 +94,13 @@ static bool parse_summary_response(void) {
     if (cJSON_IsNumber(completed_pomodoros)) {
         cached_response.pyload.summary.completed_pomodoros = completed_pomodoros->valueint;
     }
+
+    for (int i = 0; i < cached_response.pyload.summary.top_count; i++) {
+        cJSON *item = cJSON_GetArrayItem(top, i);
+        cached_response.pyload.summary.top[i].category = cJSON_GetObjectItem(item, "k")->valueint;
+        cached_response.pyload.summary.top[i].count = cJSON_GetObjectItem(item, "v")->valueint;     
+    }
+    
 
     cJSON_Delete(json);
     ESP_LOGI(TAG, "Successfully parsed summary response");
@@ -117,11 +127,12 @@ esp_err_t http_get_summary(void) {
             is_connected = true;
             notify_status_change("Conectado", false);
             ESP_LOGI(TAG, "Summary fetched successfully");
-            ESP_LOGI(TAG, "Total Tasks: %d, Completed Tasks: %d, Total Pomodoros: %d, Completed Pomodoros: %d",
+            ESP_LOGI(TAG, "Total Tasks: %d, Completed Tasks: %d, Total Pomodoros: %d, Completed Pomodoros: %d, top_3: %d",
                      cached_response.pyload.summary.total_tasks,
                      cached_response.pyload.summary.completed_tasks,
                      cached_response.pyload.summary.total_pomodoros,
-                     cached_response.pyload.summary.completed_pomodoros);
+                     cached_response.pyload.summary.completed_pomodoros,
+                     cached_response.pyload.summary.top[0].category);
         } else {
             is_connected = false;
             notify_status_change("Error JSON", true);
