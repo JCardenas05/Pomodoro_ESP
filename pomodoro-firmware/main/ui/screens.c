@@ -237,6 +237,22 @@ void create_screen_dashboard() {
                             lv_obj_set_style_flex_cross_place(obj, LV_FLEX_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
                             lv_obj_set_style_flex_track_place(obj, LV_FLEX_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
                             lv_obj_set_style_flex_main_place(obj, LV_FLEX_ALIGN_START, LV_PART_MAIN | LV_STATE_DEFAULT);
+                            {
+                                lv_obj_t *parent_obj = obj;
+                                {
+                                    lv_obj_t *obj = lv_obj_create(parent_obj);
+                                    objects.obj4 = obj;
+                                    lv_obj_set_pos(obj, 218, 51);
+                                    lv_obj_set_size(obj, 120, 28);
+                                    lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                    lv_obj_set_style_pad_top(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                    lv_obj_set_style_pad_right(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                    lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                    lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                    lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                                    create_user_widget_progress_item_db(obj, 23);
+                                }
+                            }
                         }
                     }
                 }
@@ -250,6 +266,7 @@ void create_screen_dashboard() {
 void tick_screen_dashboard() {
     tick_user_widget_progress_arc(6);
     tick_user_widget_progress_arc(12);
+    tick_user_widget_progress_item_db(23);
 }
 
 void create_screen_tasks() {
@@ -582,7 +599,7 @@ void create_screen_pomo_ui() {
                                             lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                             lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                             lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                            create_user_widget_progress_item(obj, 38);
+                                            create_user_widget_progress_item(obj, 43);
                                         }
                                         {
                                             // pomo.progress.2
@@ -596,7 +613,7 @@ void create_screen_pomo_ui() {
                                             lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                             lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                             lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                            create_user_widget_progress_item(obj, 41);
+                                            create_user_widget_progress_item(obj, 46);
                                         }
                                     }
                                 }
@@ -844,8 +861,8 @@ void tick_screen_pomo_ui() {
             tick_value_change_obj = NULL;
         }
     }
-    tick_user_widget_progress_item(38);
-    tick_user_widget_progress_item(41);
+    tick_user_widget_progress_item(43);
+    tick_user_widget_progress_item(46);
     {
         int32_t new_val = get_var_pomo_time_progress();
         int32_t cur_val = lv_arc_get_value(objects.pomo_time_progress);
@@ -1136,6 +1153,7 @@ void create_user_widget_progress_item_db(lv_obj_t *parent_obj, int startWidgetIn
             lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+            lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
             lv_obj_set_style_layout(obj, LV_LAYOUT_FLEX, LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_obj_set_style_flex_flow(obj, LV_FLEX_FLOW_COLUMN, LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_obj_set_style_flex_main_place(obj, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -1153,6 +1171,7 @@ void create_user_widget_progress_item_db(lv_obj_t *parent_obj, int startWidgetIn
                     lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_obj_set_style_radius(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+                    lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
                     lv_obj_set_style_layout(obj, LV_LAYOUT_FLEX, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_obj_set_style_flex_flow(obj, LV_FLEX_FLOW_ROW, LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_obj_set_style_flex_main_place(obj, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -1175,6 +1194,7 @@ void create_user_widget_progress_item_db(lv_obj_t *parent_obj, int startWidgetIn
                             ((lv_obj_t **)&objects)[startWidgetIndex + 1] = obj;
                             lv_obj_set_pos(obj, 37, 12);
                             lv_obj_set_size(obj, LV_PCT(65), LV_SIZE_CONTENT);
+                            lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
                             add_style_pomo_text_secundary(obj);
                             lv_obj_set_style_text_color(obj, lv_color_hex(theme_colors[active_theme_index][3]), LV_PART_MAIN | LV_STATE_DEFAULT);
                             lv_label_set_text(obj, "Categoria");
@@ -1185,7 +1205,8 @@ void create_user_widget_progress_item_db(lv_obj_t *parent_obj, int startWidgetIn
                             lv_obj_set_pos(obj, 0, 0);
                             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                             lv_obj_set_style_text_color(obj, lv_color_hex(theme_colors[active_theme_index][4]), LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_label_set_text(obj, "00");
+                            lv_obj_set_style_pad_right(obj, 1, LV_PART_MAIN | LV_STATE_DEFAULT);
+                            lv_label_set_text(obj, "3");
                         }
                     }
                 }
@@ -1244,6 +1265,13 @@ void change_color_theme(uint32_t theme_index) {
         lv_obj_set_style_text_color(((lv_obj_t **)&objects)[startWidgetIndex + 2], lv_color_hex(theme_colors[theme_index][2]), LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_set_style_text_color(((lv_obj_t **)&objects)[startWidgetIndex + 3], lv_color_hex(theme_colors[theme_index][3]), LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_set_style_text_color(((lv_obj_t **)&objects)[startWidgetIndex + 4], lv_color_hex(theme_colors[theme_index][3]), LV_PART_MAIN | LV_STATE_DEFAULT);
+    }
+    
+    {
+        int startWidgetIndex = 23;
+        lv_obj_set_style_text_color(((lv_obj_t **)&objects)[startWidgetIndex + 0], lv_color_hex(theme_colors[theme_index][3]), LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_text_color(((lv_obj_t **)&objects)[startWidgetIndex + 1], lv_color_hex(theme_colors[theme_index][3]), LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_text_color(((lv_obj_t **)&objects)[startWidgetIndex + 2], lv_color_hex(theme_colors[theme_index][4]), LV_PART_MAIN | LV_STATE_DEFAULT);
     }
     
     lv_obj_invalidate(objects.dashboard);

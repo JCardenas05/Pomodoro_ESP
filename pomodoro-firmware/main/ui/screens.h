@@ -38,6 +38,11 @@ typedef struct _objects_t {
     lv_obj_t *obj2;
     lv_obj_t *obj3;
     lv_obj_t *cat_top;
+    lv_obj_t *obj4;
+    lv_obj_t *obj4__obj2;
+    lv_obj_t *obj4__obj3;
+    lv_obj_t *obj4__obj4;
+    lv_obj_t *obj4__obj5;
     lv_obj_t *main_container;
     lv_obj_t *task_list_container;
     lv_obj_t *container_error;
