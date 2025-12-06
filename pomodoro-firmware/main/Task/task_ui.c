@@ -170,8 +170,8 @@ void upsert_task_ui_item(const ws_task_t *task) { // Funcion llamada desde on_ta
     task_count++; 
 }
 
-void upsert_category_top_ui(lv_obj_t *parent_obj, uint8_t category, uint8_t value) {
-    lv_obj_t *obj = parent_obj;
+void widget_top_item_db(lv_obj_t *parent, uint8_t category, uint8_t value) {
+    lv_obj_t *obj = parent;
     {
         lv_obj_t *parent_obj = obj;
         {
@@ -247,5 +247,22 @@ void upsert_category_top_ui(lv_obj_t *parent_obj, uint8_t category, uint8_t valu
                 }
             }
         }
+    }
+}
+
+void upsert_category_top_ui(lv_obj_t *parent, uint8_t category, uint8_t value) {
+    lv_obj_t *parent_obj = parent;
+    {
+        lv_obj_t *obj = lv_obj_create(parent_obj);
+        objects.obj4 = obj;
+        lv_obj_set_pos(obj, 0, 0);
+        lv_obj_set_size(obj, 120, 26);
+        lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_pad_top(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_pad_right(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
+        widget_top_item_db(obj, category, value);
     }
 }

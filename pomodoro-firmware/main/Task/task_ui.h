@@ -42,6 +42,6 @@ taskIconData get_task_icon_data(uint8_t categoria);
 task_card_t create_widget_task(lv_obj_t *parent_obj, const char *title, lv_color_t priority_color, const char *type);
 void tick_dynamic_tasks();
 void upsert_task_ui_item(const ws_task_t *task);
-void upsert_category_top_ui(lv_obj_t *parent_obj, uint8_t category, uint8_t value);
+void upsert_category_top_ui(lv_obj_t *parent, uint8_t category, uint8_t value);
 
 #endif // TASK_UI_H
