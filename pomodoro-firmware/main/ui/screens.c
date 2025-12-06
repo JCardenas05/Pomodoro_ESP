@@ -223,8 +223,8 @@ void create_screen_dashboard() {
                             // cat_top
                             lv_obj_t *obj = lv_obj_create(parent_obj);
                             objects.cat_top = obj;
-                            lv_obj_set_pos(obj, -13, 11);
-                            lv_obj_set_size(obj, 129, LV_PCT(100));
+                            lv_obj_set_pos(obj, -13, 20);
+                            lv_obj_set_size(obj, 129, LV_PCT(95));
                             lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                             lv_obj_set_style_pad_top(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                             lv_obj_set_style_pad_right(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -237,22 +237,6 @@ void create_screen_dashboard() {
                             lv_obj_set_style_flex_cross_place(obj, LV_FLEX_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
                             lv_obj_set_style_flex_track_place(obj, LV_FLEX_ALIGN_CENTER, LV_PART_MAIN | LV_STATE_DEFAULT);
                             lv_obj_set_style_flex_main_place(obj, LV_FLEX_ALIGN_START, LV_PART_MAIN | LV_STATE_DEFAULT);
-                            {
-                                lv_obj_t *parent_obj = obj;
-                                {
-                                    lv_obj_t *obj = lv_obj_create(parent_obj);
-                                    objects.obj4 = obj;
-                                    lv_obj_set_pos(obj, 0, 0);
-                                    lv_obj_set_size(obj, 120, 26);
-                                    lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                    lv_obj_set_style_pad_top(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                    lv_obj_set_style_pad_right(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                    lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                    lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                    lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                    create_user_widget_progress_item_db(obj, 23);
-                                }
-                            }
                         }
                     }
                 }
@@ -266,7 +250,6 @@ void create_screen_dashboard() {
 void tick_screen_dashboard() {
     tick_user_widget_progress_arc(6);
     tick_user_widget_progress_arc(12);
-    tick_user_widget_progress_item_db(23);
 }
 
 void create_screen_tasks() {
@@ -599,7 +582,7 @@ void create_screen_pomo_ui() {
                                             lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                             lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                             lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                            create_user_widget_progress_item(obj, 43);
+                                            create_user_widget_progress_item(obj, 38);
                                         }
                                         {
                                             // pomo.progress.2
@@ -613,7 +596,7 @@ void create_screen_pomo_ui() {
                                             lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                             lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
                                             lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-                                            create_user_widget_progress_item(obj, 46);
+                                            create_user_widget_progress_item(obj, 41);
                                         }
                                     }
                                 }
@@ -861,8 +844,8 @@ void tick_screen_pomo_ui() {
             tick_value_change_obj = NULL;
         }
     }
-    tick_user_widget_progress_item(43);
-    tick_user_widget_progress_item(46);
+    tick_user_widget_progress_item(38);
+    tick_user_widget_progress_item(41);
     {
         int32_t new_val = get_var_pomo_time_progress();
         int32_t cur_val = lv_arc_get_value(objects.pomo_time_progress);
@@ -1261,13 +1244,6 @@ void change_color_theme(uint32_t theme_index) {
         lv_obj_set_style_text_color(((lv_obj_t **)&objects)[startWidgetIndex + 2], lv_color_hex(theme_colors[theme_index][2]), LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_set_style_text_color(((lv_obj_t **)&objects)[startWidgetIndex + 3], lv_color_hex(theme_colors[theme_index][3]), LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_set_style_text_color(((lv_obj_t **)&objects)[startWidgetIndex + 4], lv_color_hex(theme_colors[theme_index][3]), LV_PART_MAIN | LV_STATE_DEFAULT);
-    }
-    
-    {
-        int startWidgetIndex = 23;
-        lv_obj_set_style_text_color(((lv_obj_t **)&objects)[startWidgetIndex + 0], lv_color_hex(theme_colors[theme_index][3]), LV_PART_MAIN | LV_STATE_DEFAULT);
-        lv_obj_set_style_text_color(((lv_obj_t **)&objects)[startWidgetIndex + 1], lv_color_hex(theme_colors[theme_index][3]), LV_PART_MAIN | LV_STATE_DEFAULT);
-        lv_obj_set_style_text_color(((lv_obj_t **)&objects)[startWidgetIndex + 2], lv_color_hex(theme_colors[theme_index][4]), LV_PART_MAIN | LV_STATE_DEFAULT);
     }
     
     lv_obj_invalidate(objects.dashboard);

@@ -26,6 +26,12 @@ static const char *task_type_icon[][2] = {
     { "\uf8ff", "Finance" }  // 7 finance
 };
 
+static const uint32_t color_top[3] = {
+    0xff00aaff, // Cyan
+    0xffaa00ff, // Purple
+    0xffff0048 // Orange
+};
+
 // -------Evento para hacer focus y centrar una tarea seleccionada ------
 static void task_focused_event_cb(lv_event_t *e)
 {
@@ -170,7 +176,9 @@ void upsert_task_ui_item(const ws_task_t *task) { // Funcion llamada desde on_ta
     task_count++; 
 }
 
-void widget_top_item_db(lv_obj_t *parent, uint8_t category, uint8_t value) {
+void widget_top_item_db(lv_obj_t *parent, uint8_t category, uint8_t value, uint8_t count, uint8_t index){
+    char buffer[4];
+    sprintf(buffer, "%u", count);
     lv_obj_t *obj = parent;
     {
         lv_obj_t *parent_obj = obj;
@@ -231,7 +239,7 @@ void widget_top_item_db(lv_obj_t *parent, uint8_t category, uint8_t value) {
                             lv_obj_set_pos(obj, 0, 0);
                             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                             lv_obj_set_style_text_color(obj, lv_color_hex(theme_colors[active_theme_index][4]), LV_PART_MAIN | LV_STATE_DEFAULT);
-                            lv_label_set_text(obj, "00");
+                            lv_label_set_text(obj, buffer);
                         }
                     }
                 }
@@ -242,7 +250,7 @@ void widget_top_item_db(lv_obj_t *parent, uint8_t category, uint8_t value) {
                     lv_bar_set_value(obj, value, LV_ANIM_OFF);
                     lv_obj_set_style_bg_color(obj, lv_color_hex(0xffffffff), LV_PART_MAIN | LV_STATE_DEFAULT);
                     lv_obj_set_style_bg_opa(obj, 70, LV_PART_MAIN | LV_STATE_DEFAULT);
-                    lv_obj_set_style_bg_color(obj, lv_color_hex(0xff005fff), LV_PART_INDICATOR | LV_STATE_DEFAULT);
+                    lv_obj_set_style_bg_color(obj, lv_color_hex(color_top[index]), LV_PART_INDICATOR | LV_STATE_DEFAULT);
                     lv_obj_set_style_bg_opa(obj, 255, LV_PART_INDICATOR | LV_STATE_DEFAULT);
                 }
             }
@@ -250,19 +258,18 @@ void widget_top_item_db(lv_obj_t *parent, uint8_t category, uint8_t value) {
     }
 }
 
-void upsert_category_top_ui(lv_obj_t *parent, uint8_t category, uint8_t value) {
+void upsert_category_top_ui(lv_obj_t *parent, uint8_t category, uint8_t value, uint8_t count, uint8_t index){
     lv_obj_t *parent_obj = parent;
     {
         lv_obj_t *obj = lv_obj_create(parent_obj);
-        objects.obj4 = obj;
         lv_obj_set_pos(obj, 0, 0);
-        lv_obj_set_size(obj, 120, 26);
+        lv_obj_set_size(obj, 120, 28);
         lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_set_style_pad_top(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_set_style_pad_right(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_set_style_bg_opa(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
         lv_obj_set_style_border_width(obj, 0, LV_PART_MAIN | LV_STATE_DEFAULT);
-        widget_top_item_db(obj, category, value);
+        widget_top_item_db(obj, category, value, count, index); 
     }
 }

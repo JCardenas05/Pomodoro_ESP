@@ -101,8 +101,11 @@ void update_dashboard_ui(api_response_t const* response) {
     );
     lv_arc_set_value(objects.w_arc_tasks__arc, new_val_tasks);
     lv_arc_set_value(objects.w_arc_pomo__arc, new_val_pomodoros);
+    uint8_t task_to_do = response->pyload.summary.total_tasks - response->pyload.summary.completed_tasks;
+    lv_obj_clean(objects.cat_top);
     for (int i = 0; i < response->pyload.summary.top_count; i++) {
-        upsert_category_top_ui(objects.cat_top, response->pyload.summary.top[i].category, 15);
+        uint8_t value = map_range(response->pyload.summary.top[i].count, 0, task_to_do, 0, 100);
+        upsert_category_top_ui(objects.cat_top, response->pyload.summary.top[i].category, value, response->pyload.summary.top[i].count, i);
     }
     
     ESP_LOGI(TAG, "Dashboard UI updated: Tasks %d%%, Pomodoros %d%%", new_val_tasks, new_val_pomodoros);
