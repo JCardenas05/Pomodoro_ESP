@@ -16,12 +16,19 @@ typedef struct {
     int id;  // ID de la tarea en la API
 } api_task_t;
 
+typedef struct {
+    uint8_t category;
+    uint8_t count;
+} top_item_t;
+
 // Estructura para resumen
 typedef struct {
     uint8_t total_tasks;
     uint8_t completed_tasks;
     uint8_t total_pomodoros;
     uint8_t completed_pomodoros;
+    top_item_t top[3];
+    uint8_t top_count;
 } api_task_summary_t;
 
 // Estructura para la respuesta de la API
